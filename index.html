@@ -616,6 +616,7 @@ const B={
 };
 const COST={llm:[800,.004],router:[300,.001],memory:[200,.0006],knowledge:[400,.0014],search_flights:[350,.0012],book_flight:[200,.0008],catalog:[380,.0013],compare:[300,.001],add_cart:[180,.0006],payment:[160,.0006],verify:[120,0],approval:[0,0],evalgate:[600,.002],orchestrator:[900,.005],agent_flights:[650,.003],agent_hotel:[650,.003],agent_pay:[500,.0022],respond:[260,.001]};
 const BCATS=["Brain","Tools","Safety","Multi","Out"];
+const CATMETA={Brain:{label:"🧠 Thinking",color:"#a78bfa"},Tools:{label:"🔧 Tools & APIs",color:"#6ea8fe"},Safety:{label:"🛡️ Safety &amp; Guardrails",color:"#52d08a"},Multi:{label:"🤝 Agent Team",color:"#e8b94e"},Out:{label:"💬 Response",color:"#f3736a"}};
 const CH=[
  {id:"c1",badge:null,points:100,optimal:2,tag:"Level 1 · Foundations",title:"Hello, Agent",
   scenario:"Every agent starts simple: understand the user, then answer.",userq:"Hey! What can you help me with?",
@@ -685,9 +686,11 @@ function renderChCard(){const c=CH[curIdx];
     '<div class="userq"><div class="av">🧑</div><div class="bub">'+c.userq+'</div></div>'+
     '<div class="req">🎯 <b>Mission:</b> '+c.req+'</div>';}
 function renderPalette(){const p=$("palette");p.innerHTML="";const avail=CH[curIdx].blocks;
+  const help=document.createElement("div");help.style.cssText="width:100%;font-size:11.5px;color:var(--dim);margin:0 0 8px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 10px";help.innerHTML="🧩 <b style='color:var(--muted)'>Tap or drag</b> a block to add it to your agent, then press <b style='color:var(--good)'>▶ Run</b>.";p.appendChild(help);
   BCATS.forEach(cat=>{const items=avail.filter(t=>B[t].cat===cat);if(!items.length)return;
-    const h=document.createElement("div");h.className="palcat";h.textContent=cat;p.appendChild(h);
-    items.forEach(t=>{const el=document.createElement("div");el.className="pblock";el.draggable=true;
+    const meta=CATMETA[cat]||{label:cat,color:"var(--dim)"};
+    const h=document.createElement("div");h.className="palcat";h.innerHTML=meta.label;h.style.color=meta.color;p.appendChild(h);
+    items.forEach(t=>{const el=document.createElement("div");el.className="pblock";el.draggable=true;el.title=B[t].label+" — "+B[t].desc;el.style.borderLeft="3px solid "+meta.color;
       el.innerHTML='<span class="em">'+B[t].em+'</span><span class="pl">'+B[t].label+'</span>';
       el.onclick=()=>addBlock(t);
       el.ondragstart=e=>{e.dataTransfer.setData("text/plain",t);e.dataTransfer.effectAllowed="copy";};
