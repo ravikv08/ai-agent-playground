@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Playground</title>
+<meta name="description" content="Learn LLMs, AI agents, and evals by playing: a Duolingo-meets-LEGO interactive playground. Build agents, run simulations, debug, and master evaluations.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%90%B1%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="AI Agent Playground — Learn AI by Building">
+<meta property="og:description" content="A fun, free playground to understand LLMs, AI agents, RAG, and evals — by building them. No code. ~10 minutes. Meet Milo 🐱">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{
+    --bg:#0a0c13;--bg2:#0e1119;--panel:#141926;--panel2:#1a2030;--line:#283043;--line2:#374258;
+    --ink:#eef2f9;--muted:#9fb0c6;--dim:#6a7a92;
+    --brand:#d97757;--acc:#6ea8fe;--teal:#2fb8a6;--good:#52d08a;--warn:#e8b94e;--red:#f3736a;--purple:#a78bfa;
+    --gold:#e8b94e;--gold2:#f3d27a;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.5;
+    background-image:radial-gradient(900px 500px at 92% -10%,rgba(110,168,254,.08),transparent),radial-gradient(800px 500px at -8% 112%,rgba(217,119,87,.08),transparent)}
+  a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:9px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .app{max-width:1340px;margin:0 auto}
+
+  /* HUD / nav */
+  .hud{display:flex;align-items:center;gap:14px;padding:11px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,12,19,.93);backdrop-filter:blur(8px);z-index:40;flex-wrap:wrap}
+  .logo{font-weight:850;font-size:17px;letter-spacing:-.4px;white-space:nowrap}
+  .logo .g{background:linear-gradient(90deg,var(--brand),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
+  .tab{font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:9px;background:transparent;color:var(--muted);border:1px solid transparent}
+  .tab:hover{color:var(--ink);background:var(--panel)}
+  .tab.on{background:var(--panel2);color:var(--gold2);border-color:var(--line)}
+  .hud .right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .lvlpill{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:999px;background:rgba(232,185,78,.15);color:var(--gold);border:1px solid rgba(232,185,78,.3);white-space:nowrap}
+  .xpwrap{width:150px}
+  .xpbar{height:8px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .6s}
+  .xptext{font-size:9.5px;color:var(--dim);margin-top:2px;font-family:var(--mono)}
+  .pts{font-weight:850;font-size:16px;color:var(--gold2);font-family:var(--mono);white-space:nowrap}
+  .pts span{font-size:9px;color:var(--dim);font-weight:600;letter-spacing:1px}
+
+  .view{display:none;padding:22px 20px 60px;animation:fade .35s}
+  .view.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+
+  h2.vh{font-size:27px;font-weight:850;letter-spacing:-.6px;margin:0 0 4px}
+  .vh .g{background:linear-gradient(90deg,var(--brand),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .vsub{color:var(--muted);font-size:15px;max-width:720px;margin:0 0 20px}
+  .section-tag{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--brand);font-weight:800}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+
+  /* JOURNEY */
+  .hero{text-align:center;padding:30px 10px 10px}
+  .hero h1{font-size:44px;font-weight:850;letter-spacing:-1.3px;margin:6px 0 10px;line-height:1.05}
+  .hero h1 .g{background:linear-gradient(90deg,var(--brand),var(--gold),var(--acc));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);font-size:17px;max-width:640px;margin:0 auto}
+  .statrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:22px 0 8px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 18px;text-align:center;min-width:120px}
+  .stat .v{font-size:22px;font-weight:850;color:var(--gold2);font-family:var(--mono)}
+  .stat .l{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px}
+  .worlds{display:flex;gap:14px;overflow-x:auto;padding:24px 4px 10px}
+  .world{flex:none;width:230px;border:1px solid var(--line);border-radius:16px;padding:18px;background:linear-gradient(180deg,var(--panel2),var(--panel));position:relative;transition:.15s}
+  .world:hover{transform:translateY(-3px);border-color:var(--line2)}
+  .world .wn{font-family:var(--mono);font-size:11px;color:var(--gold)}
+  .world .we{font-size:34px;margin:4px 0}
+  .world h3{margin:2px 0 6px;font-size:18px;font-weight:800}
+  .world p{margin:0 0 12px;font-size:12.8px;color:var(--muted);min-height:54px}
+  .world .pbar{height:7px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:10px}
+  .world .pf{height:100%;background:linear-gradient(90deg,var(--good),#3fb978);width:0}
+  .wbtn{width:100%;padding:10px;font-weight:750;font-size:13px;background:var(--gold);color:#1a1405}
+  .wbtn.ghost{background:var(--panel);color:var(--gold2);border:1px solid rgba(232,185,78,.35)}
+  .pathline{text-align:center;color:var(--dim);font-size:12px;margin-top:6px}
+
+  /* ACADEMY */
+  .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+  .ctile{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel);cursor:pointer;transition:.15s;position:relative}
+  .ctile:hover{transform:translateY(-3px);border-color:var(--acc)}
+  .ctile.done{border-color:rgba(82,208,138,.45)}
+  .ctile .ce{font-size:28px}
+  .ctile h4{margin:7px 0 3px;font-size:14.5px;font-weight:750}
+  .ctile p{margin:0;font-size:11.5px;color:var(--dim);line-height:1.35}
+  .ctile .chk{position:absolute;top:10px;right:11px;font-size:13px}
+  .lesson{margin-top:16px;border:1px solid var(--line2);border-radius:16px;padding:20px;background:linear-gradient(180deg,var(--panel2),var(--panel));display:none}
+  .lesson.on{display:block;animation:fade .3s}
+  .lesson .lh{display:flex;align-items:center;gap:12px}
+  .lesson .lh .le{font-size:34px}
+  .lesson .lh h3{margin:0;font-size:22px;font-weight:820}
+  .lesson .lh .tag{font-size:11px;color:var(--gold2);font-weight:700}
+  .lesson .analogy{background:rgba(232,185,78,.08);border:1px solid rgba(232,185,78,.25);border-radius:10px;padding:10px 14px;margin:12px 0;font-size:13.5px;color:var(--gold2)}
+  .lesson .body{font-size:14px;color:var(--muted)}
+  .lesson .body b{color:var(--ink)}
+  .demo{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:15px;margin:14px 0}
+  .demo .dt{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--teal);font-weight:800;margin-bottom:10px}
+  .lrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .minib{padding:9px 14px;font-weight:700;font-size:13px;background:var(--panel);border:1px solid var(--line2);color:var(--ink)}
+  .minib:hover{border-color:var(--acc)}
+  .minib.p{background:var(--good);color:#07140c;border:none}
+  .learnmore{font-size:13px;color:var(--acc);font-weight:600}
+
+  /* token chips */
+  .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  .chip{background:var(--panel2);border:1px solid var(--line2);border-radius:5px;padding:2px 6px;font-family:var(--mono);font-size:12px}
+  .chip:nth-child(3n){color:var(--acc)}.chip:nth-child(3n+1){color:var(--gold2)}.chip:nth-child(3n+2){color:var(--teal)}
+  textarea,input.t{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:9px;color:var(--ink);font-family:var(--mono);font-size:13px;padding:9px;resize:vertical}
+  select.t{background:var(--bg);border:1px solid var(--line2);border-radius:9px;color:var(--ink);padding:8px;font-family:inherit;font-size:13px}
+  .meter{height:16px;background:var(--panel2);border:1px solid var(--line2);border-radius:999px;overflow:hidden;margin:8px 0}
+  .meter .mf{height:100%;width:0;background:linear-gradient(90deg,var(--good),var(--warn),var(--red));transition:width .4s}
+  .out{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px;margin-top:10px;font-size:13px}
+  .kv{font-family:var(--mono);font-size:12px;color:var(--teal)}
+
+  /* BUILD */
+  .buildgrid{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:start}
+  @media(max-width:1000px){.buildgrid{grid-template-columns:1fr}}
+  .chcard{border:1px solid var(--line);border-radius:14px;padding:15px 17px;background:linear-gradient(180deg,var(--panel2),var(--panel));margin-bottom:12px}
+  .chcard .tag{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--brand);font-weight:800}
+  .chcard h3{margin:4px 0 6px;font-size:19px;font-weight:820}
+  .chcard p{margin:5px 0;color:var(--muted);font-size:13px}
+  .chcard .req{margin-top:9px;background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:0 9px 9px 0;padding:8px 12px;font-size:12.5px}
+  .userq{margin-top:9px;display:flex;gap:8px}.userq .av{flex:none;width:26px;height:26px;border-radius:50%;background:rgba(110,168,254,.16);display:flex;align-items:center;justify-content:center;font-size:14px}
+  .userq .bub{background:var(--panel);border:1px solid var(--line);border-radius:4px 12px 12px 12px;padding:7px 11px;font-size:13px}
+
+  .palette{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .pblock{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);cursor:grab;transition:.12s;user-select:none}
+  .pblock:hover{border-color:var(--acc);transform:translateY(-2px)}
+  .pblock .em{font-size:15px}.pblock .pl{font-size:12px;font-weight:650}
+  .palcat{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);width:100%;margin:6px 0 1px;font-weight:700}
+
+  .hcanvas{border:1.5px dashed var(--line2);border-radius:14px;padding:16px;min-height:150px;overflow-x:auto;
+    background:linear-gradient(var(--bg2) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,var(--bg2) 1px,transparent 1px) 0 0/22px 22px,var(--bg)}
+  .hcanvas.drag{border-color:var(--gold);background-color:rgba(232,185,78,.05)}
+  .flow{display:flex;align-items:stretch;gap:0;min-width:min-content}
+  .hnode{flex:none;width:132px;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px;text-align:center;position:relative;transition:.18s}
+  .hnode.start{border-color:var(--acc);background:rgba(110,168,254,.08)}
+  .hnode.run{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,185,78,.2);transform:translateY(-3px)}
+  .hnode.ok{border-color:rgba(82,208,138,.6)}
+  .hnode.bad{border-color:var(--red);box-shadow:0 0 0 3px rgba(243,115,106,.2);animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .hnode .em{font-size:22px}
+  .hnode .nl{font-size:11.5px;font-weight:700;margin-top:3px;line-height:1.2}
+  .hnode .nd{font-size:9.5px;color:var(--dim)}
+  .hnode .ctr{display:flex;justify-content:center;gap:3px;margin-top:7px}
+  .hnode .ctr button{width:22px;height:21px;background:var(--panel2);color:var(--muted);font-size:10px;border:1px solid var(--line);line-height:1}
+  .hnode .ctr .rm:hover{color:var(--red);border-color:var(--red)}
+  .harrow{flex:none;display:flex;align-items:center;color:var(--line2);font-size:18px;padding:0 3px}
+  .emptyh{color:var(--dim);font-size:13px;padding:28px;text-align:center;width:100%}
+  .emptyh .big{font-size:26px}
+
+  .actions{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap;align-items:center}
+  .btn{padding:10px 16px;font-weight:750;font-size:13px;display:flex;align-items:center;gap:6px}
+  .btn-run{background:linear-gradient(90deg,var(--good),#3fb978);color:#07140c}
+  .btn-step{background:rgba(110,168,254,.14);color:var(--acc);border:1px solid rgba(110,168,254,.35)}
+  .btn-ghost{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .btn-hint{background:rgba(232,185,78,.12);color:var(--gold);border:1px solid rgba(232,185,78,.3)}
+  .costmeter{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 11px;white-space:nowrap}
+  .costmeter b{color:var(--gold2)}
+
+  .trace{font-family:var(--mono);font-size:11.6px;line-height:1.5;background:#070a10;border:1px solid var(--line);border-radius:11px;padding:11px;min-height:300px;max-height:460px;overflow-y:auto}
+  .tl{margin:3px 0;display:flex;gap:7px;opacity:0;transform:translateY(4px);animation:fin .25s forwards}
+  @keyframes fin{to{opacity:1;transform:none}}
+  .tl.user{color:#9cc4ff}.tl.think{color:#c3b2fb}.tl.tool{color:#7fe3d4}.tl.decision{color:var(--gold2)}
+  .tl.act{color:#f0b48a}.tl.guard{color:#8ee0b0}.tl.human{color:#f3d27a}.tl.ok{color:var(--good);font-weight:700}
+  .tl.fail{color:var(--red);font-weight:700}.tl.result{color:#eef2f9;background:var(--panel2);padding:7px 9px;border-radius:7px;border-left:2px solid var(--good)}
+  .tl.sys{color:var(--dim)}.tl .cost{color:var(--dim);margin-left:auto;white-space:nowrap}
+  .traceempty{color:var(--dim);text-align:center;padding:40px 10px;font-family:var(--sans);font-size:12.5px}
+
+  .feedback{margin-top:12px;border-radius:11px;padding:12px 14px;font-size:13px;display:none}
+  .feedback.show{display:block;animation:fin .3s}
+  .feedback.win{background:rgba(82,208,138,.1);border:1px solid rgba(82,208,138,.4)}
+  .feedback.lose{background:rgba(243,115,106,.09);border:1px solid rgba(243,115,106,.4)}
+  .feedback h4{margin:0 0 5px;font-size:14px}.feedback.win h4{color:var(--good)}.feedback.lose h4{color:var(--red)}
+  .feedback .fix{color:var(--gold2);margin-top:6px}.feedback .pts{color:var(--gold2);margin-top:6px;font-weight:700}
+
+  .levelpick{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;margin-bottom:6px}
+  .lp{flex:none;min-width:116px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer;transition:.15s}
+  .lp:hover{border-color:var(--line2)}.lp.on{border-color:var(--gold);background:linear-gradient(180deg,rgba(232,185,78,.08),var(--panel))}
+  .lp.done{border-color:rgba(82,208,138,.4)}.lp.lock{opacity:.5;cursor:not-allowed}
+  .lp .k{font-size:9.5px;color:var(--dim);font-family:var(--mono);display:flex;justify-content:space-between}
+  .lp .t{font-size:12px;font-weight:700;margin-top:1px}
+
+  /* EVALS LAB */
+  .expcard{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--panel);margin-bottom:16px}
+  .expcard h3{margin:0 0 4px;font-size:18px;font-weight:800}
+  .expcard .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+  .qbox{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;margin-bottom:12px}
+  .qbox .ctx{color:var(--dim);font-size:12px;border-left:2px solid var(--line2);padding-left:9px;margin:8px 0}
+  .opts{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+  @media(max-width:640px){.opts{grid-template-columns:1fr}}
+  .opt{border:1px solid var(--line2);border-radius:11px;padding:12px;background:var(--panel2);cursor:pointer;transition:.15s;font-size:13px}
+  .opt:hover{border-color:var(--acc)}
+  .opt.correct{border-color:var(--good);background:rgba(82,208,138,.1)}
+  .opt.wrong{border-color:var(--red);background:rgba(243,115,106,.1)}
+  .opt .tagx{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+  .evtable{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}
+  .evtable th,.evtable td{border:1px solid var(--line);padding:7px 9px;text-align:center}
+  .evtable th{color:var(--gold2);font-size:11px}
+  .pass{color:var(--good);font-weight:700}.red{color:var(--red);font-weight:700}
+  .expfb{margin-top:12px;font-size:13px;padding:10px 12px;border-radius:9px;display:none}
+  .expfb.show{display:block}.expfb.g{background:rgba(82,208,138,.1);border:1px solid rgba(82,208,138,.35);color:#8ee0b0}
+  .expfb.b{background:rgba(243,115,106,.09);border:1px solid rgba(243,115,106,.35);color:#f3a49c}
+
+  /* PLAYBOOK */
+  .pbhero{border:1px solid rgba(232,185,78,.4);border-radius:16px;padding:22px;background:linear-gradient(135deg,rgba(232,185,78,.12),var(--panel));margin-bottom:18px}
+  .pbhero h3{margin:0 0 6px;font-size:22px;font-weight:850}
+  .pbhero .big{display:inline-block;margin-top:10px;background:var(--gold);color:#1a1405;font-weight:800;padding:11px 20px;border-radius:11px;font-size:14px}
+  .reflist{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:760px){.reflist{grid-template-columns:1fr}.buildgrid .trace{min-height:240px}}
+  .refcard{border:1px solid var(--line);border-radius:13px;padding:15px;background:var(--panel)}
+  .refcard h4{margin:0 0 8px;font-size:13px;color:var(--gold2);text-transform:uppercase;letter-spacing:.6px}
+  .refcard a{display:block;padding:6px 0;font-size:13.5px;border-bottom:1px dashed var(--line)}
+  .refcard a:last-child{border-bottom:none}
+  .refcard a .by{color:var(--dim);font-size:11.5px}
+  .chapters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  @media(max-width:640px){.chapters{grid-template-columns:1fr}}
+  .chap{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2);font-size:12.5px}
+  .chap b{color:var(--gold2)}
+
+  .badges{margin-top:16px}
+  .badgewrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .bdg{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:5px 9px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .bdg.got{background:rgba(232,185,78,.12);border-color:rgba(232,185,78,.35);color:var(--gold2)}
+
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:999;pointer-events:none;border-radius:2px}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+  .toast{position:fixed;left:50%;top:16px;transform:translateX(-50%) translateY(-80px);background:linear-gradient(90deg,var(--gold),var(--gold2));color:#1a1405;font-weight:850;padding:11px 20px;border-radius:12px;z-index:1000;box-shadow:0 10px 30px rgba(0,0,0,.4);opacity:0;transition:.4s}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .foot{color:var(--dim);font-size:11.5px;text-align:center;padding:16px 20px 34px;border-top:1px solid var(--line)}
+  /* Milo the AI cat mascot */
+  .mascot{position:fixed;left:16px;bottom:16px;z-index:900;display:flex;align-items:flex-end;gap:10px;max-width:330px}
+  .mascot .cat{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--brand));display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45);animation:bob 3.2s ease-in-out infinite;flex:none;border:2px solid rgba(255,255,255,.14)}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .mascot .cat:active{transform:scale(.9)}
+  .bubble{background:#fff;color:#1a2030;border-radius:14px;padding:9px 13px;font-size:12.6px;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px) scale(.96);transition:.25s;pointer-events:none;position:relative;font-weight:550;max-width:260px}
+  .bubble.show{opacity:1;transform:none}
+  .bubble:after{content:"";position:absolute;left:-6px;bottom:15px;border:6px solid transparent;border-right-color:#fff}
+  .bubble b{color:var(--brand)}
+  .bubble .nm{font-size:9px;color:var(--brand);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+  @media(max-width:700px){.mascot{max-width:220px}.mascot .cat{width:46px;height:46px;font-size:24px}.bubble{max-width:170px;font-size:11.5px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hud">
+    <div class="logo">⚡ AI Agent <span class="g">Playground</span></div>
+    <nav class="tabs" id="tabs">
+      <button class="tab" data-v="journey">🗺️ Journey</button>
+      <button class="tab" data-v="academy">🎓 Academy</button>
+      <button class="tab" data-v="build">🧩 Build</button>
+      <button class="tab" data-v="evals">🔬 Evals Lab</button>
+      <button class="tab" data-v="playbook">📖 Playbook</button>
+    </nav>
+    <div class="right">
+      <span class="lvlpill" id="lvlPill">Lv.1 · Novice</span>
+      <div class="xpwrap"><div class="xpbar"><div class="xpfill" id="xpFill"></div></div><div class="xptext" id="xpText">0 XP</div></div>
+      <div class="pts" id="ptsEl">0 <span>PTS</span></div>
+    </div>
+  </div>
+
+  <!-- ============ JOURNEY ============ -->
+  <section class="view" id="v-journey">
+    <div class="hero">
+      <div class="section-tag">Build · Run · Watch · Debug · Improve</div>
+      <h1>Learn AI by <span class="g">Building It</span></h1>
+      <p>A hands-on playground where LLMs, AI agents, and evals finally click — for everyone. Think <b>Duolingo × LEGO × an AI engineering lab</b>. No experience needed.</p>
+    </div>
+    <div class="statrow">
+      <div class="stat"><div class="v" id="sConcepts">0/13</div><div class="l">Concepts</div></div>
+      <div class="stat"><div class="v" id="sBuilds">0/8</div><div class="l">Agents Built</div></div>
+      <div class="stat"><div class="v" id="sEvals">0/3</div><div class="l">Eval Labs</div></div>
+      <div class="stat"><div class="v" id="sBadges">0</div><div class="l">Badges</div></div>
+    </div>
+    <div class="pathline">Your path → explore each world in order, or jump around. Progress saves automatically.</div>
+    <div class="worlds" id="worlds"></div>
+  </section>
+
+  <!-- ============ ACADEMY ============ -->
+  <section class="view" id="v-academy">
+    <div class="section-tag">The Complete AI Learning Journey</div>
+    <h2 class="vh">🎓 Concept <span class="g">Academy</span></h2>
+    <p class="vsub">Every essential idea behind modern AI — explained in plain English with a tiny interactive demo. Tap a card to learn it, play with it, and mark it done for XP.</p>
+    <div class="cgrid" id="cgrid"></div>
+    <div class="lesson" id="lesson"></div>
+  </section>
+
+  <!-- ============ BUILD ============ -->
+  <section class="view" id="v-build">
+    <div class="section-tag">Drag · Connect · Run · Debug</div>
+    <h2 class="vh">🧩 Build <span class="g">Lab</span></h2>
+    <p class="vsub">Snap together agents, tools, APIs and guardrails into a horizontal workflow, then watch your agent reason, call tools, and spend tokens — step by step.</p>
+    <div class="levelpick" id="levelpick"></div>
+    <div class="buildgrid">
+      <div>
+        <div class="chcard" id="chcard"></div>
+        <div class="palette" id="palette"></div>
+        <div class="hcanvas" id="canvas"></div>
+        <div class="actions">
+          <button class="btn btn-run" id="runBtn">▶ Run</button>
+          <button class="btn btn-step" id="stepBtn">⏭ Step</button>
+          <button class="btn btn-ghost" id="resetBtn">↺ Reset</button>
+          <button class="btn btn-hint" id="hintBtn">💡 Hint</button>
+          <div class="costmeter" id="costMeter">💸 <b>$0.0000</b> · 0 tok</div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="panel">
+        <h3 style="margin:0 0 9px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold2)">📟 Live Trace</h3>
+        <div class="trace" id="trace"><div class="traceempty">Press <b>▶ Run</b> or <b>⏭ Step</b> to watch your agent execute, left to right.</div></div>
+        <div class="badges"><h3 style="margin:14px 0 0;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold2)">🏅 Badges</h3><div class="badgewrap" id="badges"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EVALS LAB ============ -->
+  <section class="view" id="v-evals">
+    <div class="section-tag">Test · Compare · Catch Hallucinations · Gate</div>
+    <h2 class="vh">🔬 AI <span class="g">Evals Lab</span></h2>
+    <p class="vsub">Great AI isn't about the fanciest model — it's about knowing whether it's <i>actually good</i>. Run these interactive experiments to learn how pros measure quality and catch failures.</p>
+    <div id="evalsWrap"></div>
+  </section>
+
+  <!-- ============ PLAYBOOK ============ -->
+  <section class="view" id="v-playbook">
+    <div class="section-tag">Your Central Reference</div>
+    <h2 class="vh">📖 The Agent Golden <span class="g">Playbook</span></h2>
+    <p class="vsub">The full learning path that this playground is built on — plus the official resources from Anthropic and OpenAI to keep exploring.</p>
+    <div class="pbhero">
+      <h3>🏆 The Agent Golden Book</h3>
+      <p style="color:var(--muted);margin:0;max-width:640px">One ordered path from curious beginner → enterprise agent architect: foundations, building, the harness, evals, production, enterprise architecture, and the research frontier. The deep companion to everything you play here.</p>
+      <a class="big" href="https://claude.ai/artifact/H3eoLyYZCRwHzsNMokoo8K" target="_blank" rel="noopener">Open the Golden Book →</a>
+    </div>
+    <h4 style="color:var(--gold2);font-size:13px;letter-spacing:.6px;text-transform:uppercase;margin:4px 0 4px">The 7 chapters at a glance</h4>
+    <div class="chapters">
+      <div class="chap"><b>I · Foundations</b> — how LLMs & agents work</div>
+      <div class="chap"><b>II · Build</b> — tools, RAG, your first agent</div>
+      <div class="chap"><b>III · Harness</b> — context, memory, long-running</div>
+      <div class="chap"><b>IV · Evaluate</b> — the golden skill (eval-driven dev)</div>
+      <div class="chap"><b>V · Ship</b> — production, guardrails, cost</div>
+      <div class="chap"><b>VI · Architect</b> — enterprise & multi-agent</div>
+      <div class="chap"><b>VII · Frontier</b> — research & benchmarks</div>
+    </div>
+    <h4 style="color:var(--gold2);font-size:13px;letter-spacing:.6px;text-transform:uppercase;margin:18px 0 8px">Official resources to keep exploring</h4>
+    <div class="reflist">
+      <div class="refcard"><h4>🟣 Anthropic</h4>
+        <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building Effective Agents <span class="by">— the canonical patterns</span></a>
+        <a href="https://www.anthropic.com/engineering/writing-tools-for-agents" target="_blank" rel="noopener">Writing Effective Tools for Agents</a>
+        <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Effective Context Engineering</a>
+        <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noopener">Demystifying Evals for AI Agents</a>
+        <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol (MCP)</a>
+      </div>
+      <div class="refcard"><h4>🟢 OpenAI</h4>
+        <a href="https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf" target="_blank" rel="noopener">A Practical Guide to Building Agents <span class="by">— PDF playbook</span></a>
+        <a href="https://platform.openai.com/docs/guides/agents" target="_blank" rel="noopener">Agents guide (docs)</a>
+        <a href="https://platform.openai.com/docs/guides/function-calling" target="_blank" rel="noopener">Function calling / tool use</a>
+        <a href="https://developers.openai.com/learn/evals" target="_blank" rel="noopener">Evals guides</a>
+        <a href="https://academy.openai.com" target="_blank" rel="noopener">OpenAI Academy</a>
+      </div>
+      <div class="refcard"><h4>🎓 Courses & creators</h4>
+        <a href="https://www.deeplearning.ai/courses/evaluating-ai-agents/" target="_blank" rel="noopener">Evaluating AI Agents <span class="by">— DeepLearning.AI × Arize</span></a>
+        <a href="https://huggingface.co/learn/agents-course" target="_blank" rel="noopener">Hugging Face AI Agents Course</a>
+        <a href="https://www.youtube.com/watch?v=zjkBMFhNj_g" target="_blank" rel="noopener">Karpathy — Intro to LLMs (1 hr)</a>
+        <a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank" rel="noopener">Lilian Weng — Autonomous Agents</a>
+      </div>
+      <div class="refcard"><h4>🔬 Evals deep-dive</h4>
+        <a href="https://hamel.dev/blog/posts/evals/" target="_blank" rel="noopener">Your AI Product Needs Evals <span class="by">— Hamel Husain</span></a>
+        <a href="https://hamel.dev/blog/posts/llm-judge/" target="_blank" rel="noopener">Creating an LLM-as-a-Judge</a>
+        <a href="https://arize.com/docs/phoenix/tracing/concepts-tracing/what-are-traces" target="_blank" rel="noopener">What Are Traces (Arize Phoenix)</a>
+        <a href="https://applied-llms.org" target="_blank" rel="noopener">A Year of Building with LLMs</a>
+      </div>
+    </div>
+    <p style="color:var(--dim);font-size:12px;margin-top:16px">Part of the <b>Ravi_AI_Agents_Learn</b> project.</p>
+  </section>
+
+  <div class="foot">✨ Simulations are realistic, scripted demos for safe learning (not live API calls). Progress saves privately in your browser.<br>AI Agent Playground · learn LLMs, agents &amp; evals by building · companion to The Agent Golden Book.</div>
+</div>
+<div class="mascot" id="mascot"><div class="cat" id="milo" title="Tap Milo for a tip!">🐱</div><div class="bubble" id="miloBubble"><div class="nm">Milo</div><span id="miloText"></span></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ========== PROGRESS ========== */
+let prog={points:0,completed:[],concepts:[],evals:[],badges:[]};
+try{const s=localStorage.getItem("aiplayground");if(s)prog=Object.assign(prog,JSON.parse(s));}catch(e){}
+function save(){try{localStorage.setItem("aiplayground",JSON.stringify(prog));}catch(e){}}
+const LEVELS=[{min:0,n:"Novice"},{min:200,n:"Explorer"},{min:500,n:"Builder"},{min:1000,n:"Engineer"},{min:1700,n:"Architect"},{min:2600,n:"Master"}];
+function levelInfo(){let lv=LEVELS[0],i=0;LEVELS.forEach((l,k)=>{if(prog.points>=l.min){lv=l;i=k;}});return{i,name:lv.n,cur:lv.min,next:LEVELS[i+1]?LEVELS[i+1].min:null};}
+function addPoints(p){prog.points+=p;}
+function grantBadge(b){if(b&&!prog.badges.includes(b)){prog.badges.push(b);toast("🏅 Badge: "+b);}}
+function renderHUD(){
+  const li=levelInfo();
+  $("lvlPill").textContent="Lv."+(li.i+1)+" · "+li.name;
+  $("ptsEl").innerHTML=prog.points+' <span>PTS</span>';
+  if(li.next){$("xpFill").style.width=Math.min(100,(prog.points-li.cur)/(li.next-li.cur)*100)+"%";$("xpText").textContent=(li.next-prog.points)+" XP → "+LEVELS[li.i+1].n;}
+  else{$("xpFill").style.width="100%";$("xpText").textContent="MAX — Master 🏆";}
+  $("sConcepts").textContent=prog.concepts.length+"/13";
+  $("sBuilds").textContent=prog.completed.length+"/8";
+  $("sEvals").textContent=prog.evals.length+"/3";
+  $("sBadges").textContent=prog.badges.length;
+}
+
+/* ========== ROUTER ========== */
+const VIEWS=["journey","academy","build","evals","playbook"];
+function show(v){
+  if(!VIEWS.includes(v))v="journey";
+  VIEWS.forEach(x=>$("v-"+x).classList.toggle("on",x===v));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.v===v));
+  if(v==="journey")renderWorlds();
+  if(v==="academy")renderAcademy();
+  if(v==="build"){renderLevelPick();renderBadges();}
+  if(v==="evals")renderEvals();
+  mascotGreet(v);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{location.hash=t.dataset.v;});
+window.addEventListener("hashchange",()=>show(location.hash.replace("#","")));
+
+/* ========== JOURNEY ========== */
+const WORLDS=[
+ {n:"World 1",e:"🎓",t:"Foundations",d:"Meet LLMs, tokens, prompts, context, RAG, MCP & more — the building blocks.",go:"academy",prog:()=>prog.concepts.length/13},
+ {n:"World 2",e:"🧩",t:"Build Agents",d:"Snap tools & agents together and run real workflows: flights, shopping, support.",go:"build",prog:()=>Math.min(1,prog.completed.length/5)},
+ {n:"World 3",e:"🛡️",t:"Safety & Rails",d:"Guardrails, human-in-the-loop & safe payments — the hard-won production lessons.",go:"build",prog:()=>prog.completed.filter(x=>["c4","c5","c6"].includes(x)).length/3},
+ {n:"World 4",e:"🎛️",t:"Multi-Agent",d:"Orchestrate teams of specialist agents working together on big tasks.",go:"build",prog:()=>prog.completed.includes("c7")?1:0},
+ {n:"World 5",e:"🔬",t:"Evals Lab",d:"Measure quality, catch hallucinations, and gate what ships — the golden skill.",go:"evals",prog:()=>prog.evals.length/3}
+];
+function renderWorlds(){
+  const w=$("worlds");w.innerHTML="";
+  WORLDS.forEach(wd=>{
+    const pr=Math.round(wd.prog()*100);
+    const el=document.createElement("div");el.className="world";
+    el.innerHTML='<div class="wn">'+wd.n+'</div><div class="we">'+wd.e+'</div><h3>'+wd.t+'</h3><p>'+wd.d+'</p>'+
+      '<div class="pbar"><div class="pf" style="width:'+pr+'%"></div></div>'+
+      '<button class="wbtn'+(pr===100?' ghost':'')+'">'+(pr===0?'Start →':(pr===100?'Replay ✓':'Continue → '+pr+'%'))+'</button>';
+    el.querySelector("button").onclick=()=>{location.hash=wd.go;};
+    w.appendChild(el);
+  });
+}
+
+/* ========== ACADEMY ========== */
+const CONCEPTS=[
+ {id:"llm",e:"🧠",name:"LLMs",tag:"Large Language Models",analogy:"An LLM is like a super-reader that has absorbed much of the internet and learned to predict what word comes next.",
+  body:"A Large Language Model generates text one <b>token</b> at a time, each time predicting the most likely next piece. That simple trick — scaled up massively — produces writing, reasoning, and code. It doesn't 'look things up'; it predicts, which is why it can be fluent <i>and</i> wrong.",
+  demo:"llm",learn:"https://www.youtube.com/watch?v=zjkBMFhNj_g",learnL:"Karpathy — Intro to LLMs (1 hr)"},
+ {id:"prompts",e:"✍️",name:"Prompts",tag:"How you talk to AI",analogy:"A prompt is like a brief to a brilliant new intern — vague brief, vague work; clear brief, great work.",
+  body:"The <b>prompt</b> is your instructions to the model. Clear role, explicit steps, examples, and structure dramatically improve results. Same model, better prompt = much better output.",
+  demo:"prompt",learn:"https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",learnL:"Anthropic — Prompt engineering"},
+ {id:"tokens",e:"🧱",name:"Tokens",tag:"The LEGO bricks of text",analogy:"Tokens are the LEGO bricks of language — words get snapped into small pieces (~4 characters each).",
+  body:"Models don't read letters or words — they read <b>tokens</b>, chunks of ~4 characters. You pay per token, in and out. Fewer, well-chosen tokens = cheaper and often better.",
+  demo:"tokens",learn:"https://platform.openai.com/tokenizer",learnL:"OpenAI — Tokenizer playground"},
+ {id:"context",e:"🪟",name:"Context Window",tag:"The AI's short-term memory",analogy:"The context window is a desk: only so much fits at once. Pile on too much and things fall off the edge.",
+  body:"Everything the model 'sees' in one go — your prompt, the conversation, retrieved docs — must fit in the <b>context window</b>. It's finite. Overflow it and early info is lost, so pros <b>compact</b> (summarize) as they go.",
+  demo:"context",learn:"https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",learnL:"Anthropic — Context engineering"},
+ {id:"rag",e:"📚",name:"RAG",tag:"Retrieval-Augmented Generation",analogy:"RAG is open-book exam mode: before answering, the AI looks up the real facts instead of guessing from memory.",
+  body:"<b>RAG</b> retrieves relevant documents and feeds them to the model <i>before</i> it answers, so responses are grounded in real sources — not hallucinated. It's how AI answers questions about <i>your</i> data.",
+  demo:"rag",learn:"https://www.anthropic.com/engineering/building-effective-agents",learnL:"Anthropic — Building Effective Agents"},
+ {id:"tool",e:"🔧",name:"Tool Calling",tag:"Giving AI hands",analogy:"Tool calling is the AI reaching for a calculator or an API instead of doing math in its head.",
+  body:"On its own an LLM only talks. <b>Tool calling</b> lets it emit a structured request — <span class='kv'>search_flights(SFO→JFK)</span> — that your code runs, returning real results the model uses. Tools are how agents <i>act</i> in the world.",
+  demo:"tool",learn:"https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",learnL:"Anthropic — Tool use"},
+ {id:"mcp",e:"🔌",name:"MCP",tag:"The USB-C of AI tools",analogy:"MCP is a universal plug: build a tool once, and any AI app can snap into it — like USB-C for AI.",
+  body:"The <b>Model Context Protocol</b> is an open standard for connecting agents to tools and data. One MCP server (say, your database) works across many AI apps — no custom glue each time.",
+  demo:"mcp",learn:"https://modelcontextprotocol.io",learnL:"modelcontextprotocol.io"},
+ {id:"agents",e:"🤖",name:"AI Agents",tag:"AI that takes action",analogy:"An agent is AI that doesn't just chat — it plans, uses tools, checks its work, and loops until the job's done.",
+  body:"An <b>agent</b> wraps an LLM in a loop: <b>gather context → take action (tools) → verify → repeat</b>. That loop, plus memory and tools, turns a chatbot into something that books the flight, not just describes how.",
+  demo:"agents",learn:"https://lilianweng.github.io/posts/2023-06-23-agent/",learnL:"Lilian Weng — Autonomous Agents"},
+ {id:"multi",e:"🎛️",name:"Multi-Agent",tag:"Teams of agents",analogy:"Like a company: a manager (orchestrator) delegates to specialists who each do one thing well.",
+  body:"For big, broad tasks, a lead <b>orchestrator</b> spawns specialist <b>sub-agents</b> (flights, hotels, research) that work in parallel, then synthesizes their results. More power — and more cost — so use it when breadth justifies it.",
+  demo:"static",learn:"https://www.anthropic.com/engineering/multi-agent-research-system",learnL:"Anthropic — Multi-agent system"},
+ {id:"memory",e:"🗃️",name:"Memory",tag:"Remembering across turns",analogy:"Memory is the agent's notebook — it writes down what matters so it isn't amnesiac next turn.",
+  body:"Models are stateless; <b>memory</b> gives agents continuity. Short-term (this chat), long-term (your preferences), and external notes let an agent stay coherent across long tasks and sessions — safely partitioned per user.",
+  demo:"static",learn:"https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",learnL:"Anthropic — Context & memory"},
+ {id:"guardrails",e:"🛡️",name:"Guardrails",tag:"Keeping AI safe",analogy:"Guardrails are seatbelts and speed limits: the agent physically can't do the dangerous thing.",
+  body:"<b>Guardrails</b> are hard rules enforced in code — not polite requests in the prompt. Limits on actions (max refund $500), input/output checks, and policy filters mean 'the agent usually won't' becomes 'the system can't'.",
+  demo:"static",learn:"https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf",learnL:"OpenAI — Practical guide"},
+ {id:"hitl",e:"🙋",name:"Human-in-the-Loop",tag:"People approve risky steps",analogy:"Like a junior employee who drafts the wire transfer but a manager must click approve.",
+  body:"<b>Human-in-the-loop</b> keeps a person in control of high-stakes actions — money, deletes, anything irreversible. The agent prepares everything; the human approves. It's how you ship autonomy safely on day one.",
+  demo:"static",learn:"https://www.anthropic.com/engineering/building-effective-agents",learnL:"Anthropic — Building Effective Agents"},
+ {id:"evals",e:"🔬",name:"Evals",tag:"Measuring if it's good",analogy:"Evals are unit tests for AI — they tell you if a change made the agent smarter or dumber, before users find out.",
+  body:"<b>Evaluations</b> score your agent on a dataset of real cases with graders (code, LLM-as-judge, human). They catch regressions and gate what ships. This is <i>the</i> skill that separates demos from production. Try the Evals Lab!",
+  demo:"evalslink",learn:"https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",learnL:"Anthropic — Demystifying Evals"}
+];
+function renderAcademy(){
+  const g=$("cgrid");g.innerHTML="";
+  CONCEPTS.forEach(c=>{
+    const done=prog.concepts.includes(c.id);
+    const el=document.createElement("div");el.className="ctile"+(done?" done":"");
+    el.innerHTML='<div class="ce">'+c.e+'</div><h4>'+c.name+'</h4><p>'+c.tag+'</p><div class="chk">'+(done?"✅":"")+'</div>';
+    el.onclick=()=>openLesson(c.id);
+    g.appendChild(el);
+  });
+}
+function openLesson(id){
+  const c=CONCEPTS.find(x=>x.id===id);const L=$("lesson");
+  L.className="lesson on";
+  L.innerHTML='<div class="lh"><span class="le">'+c.e+'</span><div><div class="tag">'+c.tag+'</div><h3>'+c.name+'</h3></div></div>'+
+    '<div class="analogy">💡 '+c.analogy+'</div>'+
+    '<div class="body">'+c.body+'</div>'+
+    '<div id="demoSlot"></div>'+
+    '<div class="lrow"><button class="minib p" id="learnedBtn">'+(prog.concepts.includes(id)?"✓ Learned":"Mark as learned (+20 XP)")+'</button>'+
+    '<a class="learnmore" href="'+c.learn+'" target="_blank" rel="noopener">📖 '+c.learnL+' →</a></div>';
+  buildDemo(c.demo,$("demoSlot"));
+  $("learnedBtn").onclick=()=>{
+    if(!prog.concepts.includes(id)){prog.concepts.push(id);addPoints(20);
+      if(prog.concepts.length>=13)grantBadge("Scholar");
+      save();renderHUD();renderAcademy();$("learnedBtn").textContent="✓ Learned";confettiMini();}
+  };
+  L.scrollIntoView({behavior:"smooth",block:"start"});
+}
+/* ---- concept demos ---- */
+function buildDemo(type,slot){
+  if(type==="tokens"){
+    slot.innerHTML='<div class="demo"><div class="dt">Try it — tokenize text</div>'+
+      '<textarea id="tkIn" rows="2">Agents turn LLMs into doers, not just talkers.</textarea>'+
+      '<div id="tkOut"></div></div>';
+    const upd=()=>{const t=$("tkIn").value;const toks=t.match(/\w+|[^\s\w]/g)||[];
+      // split long words ~4 chars to mimic subword tokens
+      let final=[];toks.forEach(w=>{if(w.length>5){for(let i=0;i<w.length;i+=4)final.push(w.slice(i,i+4));}else final.push(w);});
+      $("tkOut").innerHTML='<div class="chips">'+final.map(x=>'<span class="chip">'+x.replace(/</g,"&lt;")+'</span>').join("")+'</div>'+
+        '<div class="out"><span class="kv">~'+final.length+' tokens</span> · est. cost in ≈ $'+(final.length*0.000003).toFixed(6)+' · the AI reads these pieces, not words.</div>';};
+    $("tkIn").oninput=upd;upd();
+  } else if(type==="context"){
+    slot.innerHTML='<div class="demo"><div class="dt">Fill the context window</div>'+
+      '<div class="meter"><div class="mf" id="ctxFill"></div></div>'+
+      '<div class="out" id="ctxOut">0 / 8,000 tokens used.</div>'+
+      '<div class="lrow"><button class="minib" id="ctxAdd">+ Add a message (~1,200 tok)</button><button class="minib" id="ctxClr">↺ Clear</button></div></div>';
+    let used=0;const max=8000;
+    const upd=()=>{const pct=Math.min(100,used/max*100);$("ctxFill").style.width=pct+"%";
+      let msg=used+" / 8,000 tokens used.";
+      if(used>max){msg="⚠️ Overflow! The agent <b>compacts</b> — summarizing old messages to make room. (reset to a summary)";used=2000;setTimeout(()=>{$("ctxFill").style.width=(used/max*100)+"%";$("ctxOut").innerHTML=used+" / 8,000 — old chat summarized into "+used+" tokens. Nothing important lost.";},700);}
+      $("ctxOut").innerHTML=msg;};
+    $("ctxAdd").onclick=()=>{used+=1200;upd();};$("ctxClr").onclick=()=>{used=0;upd();};upd();
+  } else if(type==="prompt"){
+    slot.innerHTML='<div class="demo"><div class="dt">Same model, two prompts</div>'+
+      '<div class="lrow"><button class="minib" id="pV">😐 Vague prompt</button><button class="minib p" id="pC">✨ Clear prompt</button></div>'+
+      '<div class="out" id="pOut">Click a prompt to see the difference.</div></div>';
+    $("pV").onclick=()=>$("pOut").innerHTML='<b>Prompt:</b> "write about dogs"<br><b>Output:</b> <span style="color:var(--dim)">"Dogs are animals. They are nice. People like dogs..."</span> — generic, unfocused.';
+    $("pC").onclick=()=>$("pOut").innerHTML='<b>Prompt:</b> "You are a vet. In 3 bullet points, explain to a new puppy owner how often to feed an 8-week-old Labrador."<br><b>Output:</b> "• 4 meals/day of puppy formula • ~1 cup total, split evenly • fixed times to aid toilet training" — specific &amp; useful.';
+  } else if(type==="llm"){
+    slot.innerHTML='<div class="demo"><div class="dt">Be the LLM — predict the next token</div>'+
+      '<div class="out" id="llmOut" style="font-family:var(--mono)">The cat sat on the</div>'+
+      '<div class="lrow"><button class="minib p" id="llmNext">Predict next token →</button><button class="minib" id="llmR">↺</button></div>'+
+      '<div style="font-size:12px;color:var(--dim);margin-top:6px">This is literally all an LLM does — one likely token at a time.</div></div>';
+    const seqs=[" mat"," and"," purred"," softly"," in"," the"," warm"," sun","."];let i=0;
+    $("llmNext").onclick=()=>{if(i<seqs.length){$("llmOut").textContent+=seqs[i++];}};
+    $("llmR").onclick=()=>{i=0;$("llmOut").textContent="The cat sat on the";};
+  } else if(type==="rag"){
+    slot.innerHTML='<div class="demo"><div class="dt">RAG vs. guessing</div>'+
+      '<select class="t" id="ragQ"><option value="refund">What is the refund window?</option><option value="ship">Do you ship internationally?</option></select>'+
+      '<div class="lrow"><button class="minib" id="ragOff">🙈 Answer from memory</button><button class="minib p" id="ragOn">📚 Answer with RAG</button></div>'+
+      '<div class="out" id="ragOut">Pick a mode.</div></div>';
+    const KB={refund:"Policy §4: refunds within 30 days with receipt.",ship:"Policy §9: ships to 40 countries; 5–10 business days."};
+    const HALL={refund:"I think it's around 90 days? Maybe lifetime for members.",ship:"Probably yes, everywhere, next-day."};
+    const q=()=>$("ragQ").value;
+    $("ragOff").onclick=()=>$("ragOut").innerHTML='<span class="red">⚠️ Hallucination risk:</span> "'+HALL[q()]+'" — confident, unsourced, possibly wrong.';
+    $("ragOn").onclick=()=>$("ragOut").innerHTML='<span class="kv">retrieved → '+KB[q()]+'</span><br><span class="pass">✓ Grounded:</span> the agent answers from the real policy, with a source.';
+  } else if(type==="tool"){
+    slot.innerHTML='<div class="demo"><div class="dt">Watch a tool call happen</div>'+
+      '<div class="out">User: "What\'s the weather in Tokyo?"</div>'+
+      '<div class="lrow"><button class="minib p" id="toolGo">▶ Run the agent</button></div>'+
+      '<div id="toolSteps" style="margin-top:8px"></div></div>';
+    $("toolGo").onclick=async()=>{const s=$("toolSteps");s.innerHTML="";
+      const lines=['<div class="out" style="color:#c3b2fb">🧠 I can\'t know live weather — I\'ll call a tool.</div>',
+        '<div class="out" style="color:#7fe3d4">🔧 tool_call: get_weather({ "city": "Tokyo" })</div>',
+        '<div class="out" style="color:#7fe3d4">↩ result: { "temp": "18°C", "sky": "clear" }</div>',
+        '<div class="out" style="border-left:2px solid var(--good)">💬 "It\'s 18°C and clear in Tokyo right now."</div>'];
+      for(const l of lines){s.insertAdjacentHTML("beforeend",l);await delay(650);}};
+  } else if(type==="mcp"){
+    slot.innerHTML='<div class="demo"><div class="dt">How MCP connects things</div>'+
+      '<svg viewBox="0 0 520 90" style="width:100%"><defs><marker id="m1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#6a7a92"/></marker></defs>'+
+      '<rect x="10" y="28" width="130" height="36" rx="9" fill="#1a2030" stroke="#6ea8fe"/><text x="75" y="51" text-anchor="middle" fill="#eef2f9" font-size="12" font-family="sans-serif">AI App (host)</text>'+
+      '<rect x="195" y="28" width="130" height="36" rx="9" fill="#1a2030" stroke="#a78bfa"/><text x="260" y="51" text-anchor="middle" fill="#eef2f9" font-size="12" font-family="sans-serif">MCP client</text>'+
+      '<rect x="380" y="28" width="130" height="36" rx="9" fill="#1a2030" stroke="#2fb8a6"/><text x="445" y="46" text-anchor="middle" fill="#eef2f9" font-size="11.5" font-family="sans-serif">MCP server</text><text x="445" y="59" text-anchor="middle" fill="#9fb0c6" font-size="9" font-family="sans-serif">your tools & data</text>'+
+      '<line x1="140" y1="46" x2="193" y2="46" stroke="#6a7a92" stroke-width="1.5" marker-end="url(#m1)"/><line x1="325" y1="46" x2="378" y2="46" stroke="#6a7a92" stroke-width="1.5" marker-end="url(#m1)"/></svg>'+
+      '<div class="out">Build the <b>server</b> once (for your database, Slack, GitHub…) and <i>any</i> MCP-speaking AI app can use it. No custom integration each time.</div></div>';
+  } else if(type==="agents"){
+    slot.innerHTML='<div class="demo"><div class="dt">The agent loop</div>'+
+      '<svg viewBox="0 0 520 70" style="width:100%"><defs><marker id="m2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#e8b94e"/></marker></defs>'+
+      '<rect x="10" y="18" width="140" height="34" rx="9" fill="#1a2030" stroke="#6ea8fe"/><text x="80" y="40" text-anchor="middle" fill="#eef2f9" font-size="12" font-family="sans-serif">1 · Gather context</text>'+
+      '<rect x="190" y="18" width="130" height="34" rx="9" fill="#1a2030" stroke="#d97757"/><text x="255" y="40" text-anchor="middle" fill="#eef2f9" font-size="12" font-family="sans-serif">2 · Take action</text>'+
+      '<rect x="360" y="18" width="150" height="34" rx="9" fill="#1a2030" stroke="#52d08a"/><text x="435" y="40" text-anchor="middle" fill="#eef2f9" font-size="12" font-family="sans-serif">3 · Verify & loop</text>'+
+      '<line x1="150" y1="35" x2="188" y2="35" stroke="#e8b94e" stroke-width="1.6" marker-end="url(#m2)"/><line x1="320" y1="35" x2="358" y2="35" stroke="#e8b94e" stroke-width="1.6" marker-end="url(#m2)"/></svg>'+
+      '<div class="out">Build this loop yourself in the <b>Build Lab</b> → try "Book a Flight". <button class="minib p" style="margin-left:8px" onclick="location.hash=\'build\'">Go to Build →</button></div></div>';
+  } else if(type==="evalslink"){
+    slot.innerHTML='<div class="demo"><div class="dt">Practice it live</div><div class="out">The best way to learn evals is to do them. <button class="minib p" style="margin-left:6px" onclick="location.hash=\'evals\'">Open the Evals Lab →</button></div></div>';
+  } else {
+    slot.innerHTML="";
+  }
+}
+
+/* ========== BUILD LAB ========== */
+const B={
+  llm:{em:"🧠",label:"LLM",desc:"think",cat:"Brain"},
+  router:{em:"🔀",label:"Router",desc:"decide",cat:"Brain"},
+  memory:{em:"🗃️",label:"Memory",desc:"remember",cat:"Brain"},
+  knowledge:{em:"📚",label:"Knowledge",desc:"RAG",cat:"Tools"},
+  search_flights:{em:"✈️",label:"Search Flights",desc:"API",cat:"Tools"},
+  book_flight:{em:"🎫",label:"Book Flight",desc:"API",cat:"Tools"},
+  catalog:{em:"🛍️",label:"Product Search",desc:"API",cat:"Tools"},
+  compare:{em:"⚖️",label:"Compare",desc:"rank",cat:"Tools"},
+  add_cart:{em:"🛒",label:"Add to Cart",desc:"API",cat:"Tools"},
+  payment:{em:"💳",label:"Payment",desc:"charge",cat:"Tools"},
+  verify:{em:"🛡️",label:"Verify",desc:"guardrail",cat:"Safety"},
+  approval:{em:"🙋",label:"Approval",desc:"human",cat:"Safety"},
+  evalgate:{em:"✅",label:"Eval Gate",desc:"test",cat:"Safety"},
+  orchestrator:{em:"🎛️",label:"Orchestrator",desc:"lead",cat:"Multi"},
+  agent_flights:{em:"🧭",label:"Flights Agent",desc:"sub",cat:"Multi"},
+  agent_hotel:{em:"🏨",label:"Hotel Agent",desc:"sub",cat:"Multi"},
+  agent_pay:{em:"💠",label:"Payment Agent",desc:"sub",cat:"Multi"},
+  respond:{em:"💬",label:"Respond",desc:"output",cat:"Out"}
+};
+const COST={llm:[800,.004],router:[300,.001],memory:[200,.0006],knowledge:[400,.0014],search_flights:[350,.0012],book_flight:[200,.0008],catalog:[380,.0013],compare:[300,.001],add_cart:[180,.0006],payment:[160,.0006],verify:[120,0],approval:[0,0],evalgate:[600,.002],orchestrator:[900,.005],agent_flights:[650,.003],agent_hotel:[650,.003],agent_pay:[500,.0022],respond:[260,.001]};
+const BCATS=["Brain","Tools","Safety","Multi","Out"];
+const CH=[
+ {id:"c1",badge:null,points:100,optimal:2,tag:"Level 1 · Foundations",title:"Hello, Agent",
+  scenario:"Every agent starts simple: understand the user, then answer.",userq:"Hey! What can you help me with?",
+  req:"Make the agent <b>think</b>, then <b>respond</b>.",blocks:["llm","respond"],
+  teach:"The core of every agent: reason → act. Here the only action is answering.",
+  check:{mustInclude:["llm","respond"],respondLast:true},hint:"Add 🧠 LLM → 💬 Respond."},
+ {id:"c2",badge:"Grounded",points:140,optimal:3,tag:"Level 2 · RAG",title:"Ground the Truth",
+  scenario:"A customer asks about policy. If the agent guesses, it hallucinates.",userq:"What's your refund policy on opened items?",
+  req:"<b>Search knowledge</b> before responding — never invent policy.",blocks:["llm","knowledge","respond"],
+  teach:"Grounding (RAG): retrieve real context before answering.",
+  check:{mustInclude:["knowledge","respond"],before:[{a:"knowledge",b:"respond",reason:"Look it up before you answer."}],respondLast:true},
+  hint:"🧠 → 📚 Knowledge → 💬 Respond.",data:{}},
+ {id:"c3",badge:"Tool User",points:170,optimal:5,tag:"Level 3 · Tool Use",title:"Book a Flight",
+  scenario:"Real agents use tools in the right order: gather → decide → act.",userq:"Book me the cheapest flight from SF to NYC next Friday.",
+  req:"<b>Search</b> → <b>decide</b> → <b>book</b> → respond. Don't book before searching!",blocks:["llm","search_flights","router","book_flight","respond"],
+  teach:"The agent loop: gather context → decide → act → respond.",
+  check:{mustInclude:["search_flights","book_flight","respond"],before:[{a:"search_flights",b:"book_flight",reason:"You can't book a flight you haven't found."}],requireBefore:[{need:"router",target:"book_flight",reason:"Decide which flight before booking."}],respondLast:true},
+  hint:"🧠 → ✈️ → 🔀 → 🎫 → 💬.",data:{flights:[["UA 123","$420"],["DL 88","$510"],["B6 45","$460"]],pick:"UA 123",price:"$420",conf:"QX7K2"}},
+ {id:"c4",badge:"Guardian",points:220,optimal:5,tag:"Level 4 · Guardrails",title:"Process a Payment Safely",
+  scenario:"Money is a different game. An agent must NEVER charge a card on its own.",userq:"Go ahead and pay the $420 for my flight.",
+  req:"<b>Verify</b> + <b>human approval</b> BEFORE Payment. Then respond.",blocks:["llm","verify","approval","payment","respond"],
+  teach:"Tiered actions: moving money needs a policy check AND a human sign-off.",
+  check:{mustInclude:["payment","respond"],requireBefore:[{need:"approval",target:"payment",reason:"Money actions need a human to approve first."},{need:"verify",target:"payment",reason:"Check the amount against policy before charging."}],respondLast:true},
+  hint:"🧠 → 🛡️ → 🙋 → 💳 → 💬.",data:{amount:"$420.00",txn:"PI_9f2a71"}},
+ {id:"c5",badge:"Builder",points:260,optimal:7,tag:"Level 5 · E-Commerce",title:"AI Shopping Assistant",
+  scenario:"Build a shopping agent for a major e-commerce platform: find, pick, cart, safe checkout.",userq:"Find me good wireless earbuds under $100 and buy them.",
+  req:"<b>Search</b> → <b>compare</b> → <b>cart</b> → <b>verify</b> → <b>approval</b> → <b>pay</b> → respond.",blocks:["llm","catalog","compare","add_cart","verify","approval","payment","respond"],
+  teach:"A real assistant chains many tools — and never skips the safe-checkout rails.",
+  check:{mustInclude:["catalog","add_cart","payment","respond"],before:[{a:"catalog",b:"add_cart",reason:"Find the product before adding to cart."},{a:"add_cart",b:"payment",reason:"Add to cart before paying."}],requireBefore:[{need:"approval",target:"payment",reason:"Checkout needs human approval first."},{need:"verify",target:"payment",reason:"Verify the total before charging."}],respondLast:true},
+  hint:"🛍️ → ⚖️ → 🛒 → 🛡️ → 🙋 → 💳 → 💬.",data:{product:"Acme Air Buds Pro",price:"$89",rating:"4.5★",txn:"PI_7b3c90"}},
+ {id:"c6",badge:"Debugger",points:230,optimal:5,tag:"Level 6 · Debug",title:"It Broke in Production!",
+  scenario:"🚨 Incident! Customers got charged before approving. Fix the order.",userq:"Refund a duplicate charge of $60 for my order.",
+  req:"The agent <b>pays before approval</b>. Reorder so 🛡️ Verify & 🙋 Approval come BEFORE 💳 Payment.",blocks:["llm","verify","approval","payment","respond"],
+  preload:["llm","payment","verify","approval","respond"],
+  teach:"Debugging means reading the trace, finding where safety was skipped, and fixing the order.",
+  check:{mustInclude:["payment","respond"],requireBefore:[{need:"approval",target:"payment",reason:"Approval must come before the charge."},{need:"verify",target:"payment",reason:"Verify must come before the charge."}],respondLast:true},
+  hint:"Use ◀▶ to move 🛡️ & 🙋 before 💳.",data:{amount:"$60.00",txn:"PI_refund22"}},
+ {id:"c7",badge:"Orchestrator",points:300,optimal:6,tag:"Level 7 · Multi-Agent",title:"Multi-Agent Trip Planner",
+  scenario:"Big tasks split across specialists coordinated by an orchestrator.",userq:"Plan my trip to NYC — flight, hotel, and pay for both.",
+  req:"Start with <b>Orchestrator</b>, run <b>Flights</b> & <b>Hotel</b> agents, get <b>approval</b> before <b>Payment Agent</b>, then respond.",blocks:["orchestrator","agent_flights","agent_hotel","approval","agent_pay","respond"],
+  teach:"Orchestrator-workers: a lead agent delegates to specialists, then synthesizes — with the same money guardrail.",
+  check:{mustInclude:["orchestrator","agent_flights","agent_hotel","agent_pay","respond"],startWith:"orchestrator",requireBefore:[{need:"approval",target:"agent_pay",reason:"Even a sub-agent needs approval before spending."}],respondLast:true},
+  hint:"🎛️ → 🧭 → 🏨 → 🙋 → 💠 → 💬.",data:{flight:"UA 123 $420",hotel:"The Nomad $240/nt",total:"$900"}},
+ {id:"c8",badge:"Evaluator",points:320,optimal:7,tag:"Level 8 · Eval-Driven",title:"Ship with Evals",
+  scenario:"The pro move: never ship a change your evals haven't passed.",userq:"Buy the earbuds — and don't ship if quality drops.",
+  req:"Build the shopping flow, then put an <b>✅ Eval Gate</b> right before <b>Respond</b>.",blocks:["llm","catalog","add_cart","verify","approval","payment","evalgate","respond"],
+  teach:"Evaluation-driven development: a gate runs your test set and blocks the ship if the score drops.",
+  check:{mustInclude:["catalog","payment","evalgate","respond"],before:[{a:"catalog",b:"payment",reason:"Find & cart before paying."},{a:"evalgate",b:"respond",reason:"The eval gate must run before you ship."}],requireBefore:[{need:"approval",target:"payment",reason:"Approval before charge."},{need:"evalgate",target:"respond",reason:"Gate the ship with evals."}],respondLast:true},
+  hint:"…🛒 → 🛡️ → 🙋 → 💳 → ✅ → 💬.",data:{product:"Acme Air Buds Pro",price:"$89",score:"19/20 pass · grounding 0.98"}}
+];
+const BADGE_LIST=[{id:"Scholar",e:"🎓"},{id:"Grounded",e:"📚"},{id:"Tool User",e:"🔧"},{id:"Guardian",e:"🛡️"},{id:"Builder",e:"🧱"},{id:"Debugger",e:"🐞"},{id:"Orchestrator",e:"🎛️"},{id:"Evaluator",e:"✅"},{id:"Scientist",e:"🔬"}];
+
+let curIdx=0,wf=[],tries=0;
+let runState=null; // {ptr, v, totTok, totCost, running}
+const lab=t=>B[t].em+" "+B[t].label;
+function unlocked(i){return i===0||prog.completed.includes(CH[i-1].id);}
+
+function renderLevelPick(){
+  const lp=$("levelpick");lp.innerHTML="";
+  CH.forEach((c,i)=>{const done=prog.completed.includes(c.id),lock=!unlocked(i);
+    const el=document.createElement("div");el.className="lp"+(i===curIdx?" on":"")+(done?" done":"")+(lock?" lock":"");
+    el.innerHTML='<div class="k"><span>LV '+(i+1)+'</span><span>'+(done?"⭐":(lock?"🔒":c.points+"xp"))+'</span></div><div class="t">'+c.title+'</div>';
+    if(!lock)el.onclick=()=>loadCh(i);lp.appendChild(el);});
+}
+function renderChCard(){const c=CH[curIdx];
+  $("chcard").innerHTML='<div class="tag">'+c.tag+'</div><h3>'+c.title+'</h3><p>'+c.scenario+'</p>'+
+    '<div class="userq"><div class="av">🧑</div><div class="bub">'+c.userq+'</div></div>'+
+    '<div class="req">🎯 <b>Mission:</b> '+c.req+'</div>';}
+function renderPalette(){const p=$("palette");p.innerHTML="";const avail=CH[curIdx].blocks;
+  BCATS.forEach(cat=>{const items=avail.filter(t=>B[t].cat===cat);if(!items.length)return;
+    const h=document.createElement("div");h.className="palcat";h.textContent=cat;p.appendChild(h);
+    items.forEach(t=>{const el=document.createElement("div");el.className="pblock";el.draggable=true;
+      el.innerHTML='<span class="em">'+B[t].em+'</span><span class="pl">'+B[t].label+'</span>';
+      el.onclick=()=>addBlock(t);
+      el.ondragstart=e=>{e.dataTransfer.setData("text/plain",t);e.dataTransfer.effectAllowed="copy";};
+      p.appendChild(el);});});}
+function renderCanvas(){const cv=$("canvas");cv.innerHTML="";
+  const flow=document.createElement("div");flow.className="flow";
+  const st=document.createElement("div");st.className="hnode start";
+  st.innerHTML='<div class="em">🧑</div><div class="nl">User</div><div class="nd">request</div>';flow.appendChild(st);
+  if(!wf.length){const e=document.createElement("div");e.className="emptyh";e.innerHTML='<div class="big">🧩</div>Drag or click blocks to build left → right.';cv.appendChild(flow);cv.appendChild(e);return;}
+  wf.forEach((t,i)=>{
+    const ar=document.createElement("div");ar.className="harrow";ar.textContent="→";flow.appendChild(ar);
+    const n=document.createElement("div");n.className="hnode";n.id="hn"+i;n.draggable=true;
+    n.innerHTML='<div class="em">'+B[t].em+'</div><div class="nl">'+B[t].label+'<div class="nd">'+B[t].desc+'</div></div>'+
+      '<div class="ctr"><button title="left">◀</button><button title="right">▶</button><button class="rm" title="remove">✕</button></div>';
+    const bs=n.querySelectorAll("button");bs[0].onclick=()=>move(i,-1);bs[1].onclick=()=>move(i,1);bs[2].onclick=()=>remove(i);
+    n.ondragstart=e=>{e.dataTransfer.setData("reorder",i);e.dataTransfer.effectAllowed="move";};
+    n.ondragover=e=>e.preventDefault();
+    n.ondrop=e=>{e.preventDefault();const f=e.dataTransfer.getData("reorder");if(f!=="")reorder(+f,i);};
+    flow.appendChild(n);});
+  cv.appendChild(flow);}
+function renderBadges(){const b=$("badges");if(!b)return;b.innerHTML="";
+  BADGE_LIST.forEach(bd=>{const got=prog.badges.includes(bd.id);const el=document.createElement("div");el.className="bdg"+(got?" got":"");el.innerHTML='<span>'+(got?bd.e:"🔒")+'</span>'+bd.id;b.appendChild(el);});}
+function renderBuild(){renderLevelPick();renderChCard();renderPalette();renderCanvas();renderBadges();updCost(0,0);}
+
+function addBlock(t){if(runState&&runState.running)return;wf.push(t);resetRun();renderCanvas();}
+function remove(i){if(runState&&runState.running)return;wf.splice(i,1);resetRun();renderCanvas();}
+function move(i,d){if(runState&&runState.running)return;const j=i+d;if(j<0||j>=wf.length)return;[wf[i],wf[j]]=[wf[j],wf[i]];resetRun();renderCanvas();}
+function reorder(f,t){if(runState&&runState.running)return;const x=wf.splice(f,1)[0];wf.splice(t,0,x);resetRun();renderCanvas();}
+const cvEl=$("canvas");
+cvEl.addEventListener("dragover",e=>{if(e.dataTransfer.types.includes("text/plain")){e.preventDefault();cvEl.classList.add("drag");}});
+cvEl.addEventListener("dragleave",()=>cvEl.classList.remove("drag"));
+cvEl.addEventListener("drop",e=>{cvEl.classList.remove("drag");const t=e.dataTransfer.getData("text/plain");if(t&&B[t]){e.preventDefault();addBlock(t);}});
+
+function validate(){const c=CH[curIdx],ck=c.check,t=wf;
+  for(const m of (ck.mustInclude||[]))if(!t.includes(m))return{pass:false,idx:null,msg:"Your agent is missing <b>"+lab(m)+"</b> — it can't finish without it."};
+  if(ck.startWith&&t[0]!==ck.startWith)return{pass:false,idx:0,msg:"Start with <b>"+lab(ck.startWith)+"</b> to coordinate everything."};
+  for(const r of (ck.before||[])){const ia=t.indexOf(r.a),ib=t.indexOf(r.b);if(ib!==-1&&(ia===-1||ia>ib))return{pass:false,idx:ib,msg:"<b>"+lab(r.b)+"</b> ran before <b>"+lab(r.a)+"</b>. "+r.reason};}
+  for(const r of (ck.requireBefore||[])){const it=t.indexOf(r.target);if(it!==-1){const ineed=t.slice(0,it).indexOf(r.need);if(ineed===-1)return{pass:false,idx:it,msg:"<b>"+lab(r.target)+"</b> ran without <b>"+lab(r.need)+"</b> first. "+r.reason};}}
+  if(ck.respondLast){if(!t.includes("respond"))return{pass:false,idx:null,msg:"Add <b>💬 Respond</b> so the agent replies."};if(t[t.length-1]!=="respond")return{pass:false,idx:t.indexOf("respond"),msg:"<b>💬 Respond</b> should be the last step."};}
+  return{pass:true};}
+
+function simLines(t,c){const d=c.data||{};const map={
+  llm:["think","🧠","Reasoning about the request… planning next steps."],
+  router:["decision","🔀","Decision: compared options → picked "+(d.pick?"<b>"+d.pick+"</b> ("+d.price+")":"the best match")+"."],
+  memory:["think","🗃️","Loaded preferences: aisle seat, saved card."],
+  knowledge:["tool","📚",'tool: search_kb("refund policy") → "Opened items refundable within 30 days with receipt."'],
+  search_flights:["tool","✈️","tool: search_flights(SFO→JFK, Fri) → "+(d.flights?d.flights.map(f=>f[0]+" "+f[1]).join(" · "):"3 options")],
+  book_flight:["act","🎫","action: book_flight("+(d.pick||"UA 123")+") → confirmed #"+(d.conf||"QX7K2")+" ✔"],
+  catalog:["tool","🛍️","tool: product_search(\"earbuds <$100\") → top: "+(d.product||"Acme Air Buds")+" "+(d.price||"$89")+" "+(d.rating||"4.5★")],
+  compare:["decision","⚖️","Ranked by rating & price → best: <b>"+(d.product||"Acme Air Buds")+"</b> "+(d.price||"$89")+"."],
+  add_cart:["act","🛒","action: add_to_cart("+(d.product||"Acme Air Buds")+") → total "+(d.price||"$89")+" ✔"],
+  verify:["guard","🛡️","guardrail: amount "+(d.amount||d.price||"$89")+" ≤ limit ✔ · in policy ✔ · owns account ✔"],
+  approval:["human","🙋","awaiting human approval…  ✅ Approved by you."],
+  payment:["act","💳","action: charge("+(d.amount||d.price||"$89")+") → txn #"+(d.txn||"PI_7b3c90")+" ✔ (approved)"],
+  evalgate:["guard","✅","eval gate: "+(d.score||"19/20 pass · grounding 0.98")+" → cleared to ship ✔"],
+  orchestrator:["think","🎛️","Orchestrator: decomposing task → delegating to sub-agents."],
+  agent_flights:["tool","🧭","Flights agent → "+(d.flight||"UA 123 $420")+" ✔"],
+  agent_hotel:["tool","🏨","Hotel agent → "+(d.hotel||"The Nomad $240/nt")+" ✔"],
+  agent_pay:["act","💠","Payment agent → charged "+(d.total||"$900")+" after approval ✔"],
+  respond:["result","💬",respondText(c)]};
+  return map[t]||["sys","•",B[t].label];}
+function respondText(c){const d=c.data||{};const m={c1:"“I can help with travel, shopping, questions and more — what do you need?”",c2:"“Opened items are refundable within 30 days with a receipt. Start a return?”",c3:"“Booked "+d.pick+" for "+d.price+", confirmation #"+d.conf+". ✈️”",c4:"“Paid "+d.amount+" for your flight — approved & confirmed. ✅”",c5:"“Bought the "+d.product+" for "+d.price+" — arriving in 2 days. 🛒”",c6:"“Verified & refunded "+d.amount+" — approved first, safely processed. ✅”",c7:"“Trip booked: "+d.flight+" + "+d.hotel+". Total "+d.total+", approved. 🧳”",c8:"“Order placed for the "+d.product+" — eval gate passed, safe to ship. ✅”"};return m[c.id]||"“Done!”";}
+
+function updCost(tok,cost){$("costMeter").innerHTML="💸 <b>$"+cost.toFixed(4)+"</b> · "+tok+" tok";}
+function pushLine(kind,ic,txt,cost){const tr=$("trace");const l=document.createElement("div");l.className="tl "+kind;
+  l.innerHTML='<span class="ic">'+ic+'</span><span>'+txt+'</span>'+(cost?'<span class="cost">'+cost+'</span>':'');tr.appendChild(l);tr.scrollTop=tr.scrollHeight;}
+function resetRun(){runState=null;clearFeedback();updCost(0,0);}
+
+function prepareRun(){
+  document.querySelectorAll(".hnode").forEach(n=>n.classList.remove("run","ok","bad"));
+  $("trace").innerHTML="";clearFeedback();tries++;
+  const v=validate();
+  runState={ptr:0,v:v,totTok:0,totCost:0,running:false,done:false,failed:false};
+  pushLine("user","🧑","User: "+CH[curIdx].userq);
+  pushLine("sys","⚙️","Agent started · "+wf.length+" steps");
+  updCost(0,0);
+}
+function stepOnce(){
+  if(!runState)prepareRun();
+  if(runState.done)return false;
+  const i=runState.ptr,c=CH[curIdx],v=runState.v;
+  if(i>=wf.length){finishRun();return false;}
+  document.querySelectorAll(".hnode").forEach(n=>n.classList.remove("run"));
+  const node=$("hn"+i);if(node)node.classList.add("run");
+  if(v.idx===i&&!v.pass){
+    if(node){node.classList.remove("run");node.classList.add("bad");}
+    pushLine("fail","❌","BLOCKED at "+B[wf[i]].label+" — "+v.msg.replace(/<[^>]+>/g,""));
+    runState.failed=true;runState.done=true;finishRun();return false;
+  }
+  const [k,ic,tx]=simLines(wf[i],c);const cc=COST[wf[i]]||[0,0];runState.totTok+=cc[0];runState.totCost+=cc[1];
+  pushLine(k,ic,tx,cc[0]?("· "+cc[0]+" tok · $"+cc[1].toFixed(4)):"");
+  if(node){node.classList.remove("run");node.classList.add("ok");}
+  updCost(runState.totTok,runState.totCost);
+  runState.ptr++;
+  if(runState.ptr>=wf.length){finishRun();}
+  return true;
+}
+function finishRun(){
+  if(runState.handled)return;runState.handled=true;runState.done=true;
+  const v=runState.v;
+  if(!runState.failed&&v.pass){pushLine("ok","✅","Task complete · total "+runState.totTok+" tokens · $"+runState.totCost.toFixed(4));win();}
+  else{if(!runState.failed)pushLine("fail","❌",v.msg.replace(/<[^>]+>/g,""));lose(v);}
+  $("runBtn").disabled=false;$("stepBtn").disabled=false;$("resetBtn").disabled=false;runState.running=false;
+}
+async function runAll(){
+  if(runState&&runState.running)return;
+  prepareRun();runState.running=true;$("runBtn").disabled=true;$("stepBtn").disabled=true;$("resetBtn").disabled=true;
+  await delay(500);
+  while(runState&&!runState.done){await delay(640);stepOnce();}
+}
+function stepBtn(){
+  if(!runState||runState.done){prepareRun();}
+  if(runState.running)return;
+  stepOnce();
+}
+function win(){const c=CH[curIdx];const first=tries===1,lean=wf.length<=c.optimal;const already=prog.completed.includes(c.id);
+  let pts=already?Math.round(c.points*0.25):c.points+(first?60:0)+(lean?30:0);
+  const fb=$("feedback");fb.className="feedback show win";
+  fb.innerHTML='<h4>🎉 Challenge Complete!</h4>'+c.teach+'<div class="pts">+'+pts+' XP'+(already?" (replay)":(first?" · First-try bonus 🥇":""))+(lean&&!already?" · Lean build +30 ⚡":"")+'</div>';
+  const before=levelInfo().i;
+  if(!already){prog.completed.push(c.id);addPoints(pts);grantBadge(c.badge);if(prog.completed.length>=8)grantBadge("Builder");confetti();toast("⭐ "+c.title+" cleared!");}
+  else addPoints(pts);
+  save();renderHUD();renderLevelPick();renderBadges();
+  if(levelInfo().i>before)setTimeout(()=>toast("🔼 Level up — "+levelInfo().name+"!"),900);
+}
+function lose(v){const fb=$("feedback");fb.className="feedback show lose";
+  fb.innerHTML='<h4>🔧 Not quite — debug it!</h4>'+v.msg+'<div class="fix">💡 Read the trace, fix the blocks, and run again. Every failure is a lesson.</div>';}
+function clearFeedback(){const fb=$("feedback");fb.className="feedback";fb.innerHTML="";}
+function loadCh(i){if(!unlocked(i))return;curIdx=i;tries=0;wf=CH[i].preload?[...CH[i].preload]:[];runState=null;
+  $("trace").innerHTML='<div class="traceempty">Press <b>▶ Run</b> or <b>⏭ Step</b> to watch your agent execute, left → right.</div>';
+  renderBuild();}
+$("runBtn").onclick=runAll;
+$("stepBtn").onclick=stepBtn;
+$("resetBtn").onclick=()=>{wf=CH[curIdx].preload?[...CH[curIdx].preload]:[];resetRun();renderCanvas();$("trace").innerHTML='<div class="traceempty">Press <b>▶ Run</b> or <b>⏭ Step</b> to watch your agent execute.</div>';};
+$("hintBtn").onclick=()=>{const c=CH[curIdx];const fb=$("feedback");fb.className="feedback show";fb.style.background="rgba(232,185,78,.1)";fb.style.border="1px solid rgba(232,185,78,.4)";fb.innerHTML='<h4 style="color:var(--gold2)">💡 Hint</h4>'+c.hint;toast("💡 Hint");};
+
+/* ========== EVALS LAB ========== */
+const EXPS=[
+ {id:"e1",icon:"🕵️",title:"Spot the Hallucination",sub:"Two agents answered the same question. One made it up. Which answer is the hallucination?",
+  rounds:[
+   {q:"Customer: “How long is the return window?”",ctx:"Knowledge base says: Returns accepted within 30 days with receipt.",
+    a:{t:"“Returns are accepted within 30 days with a receipt.”",h:false},b:{t:"“You can return anything within 1 year, no receipt needed!”",h:true},
+    why:"Answer B invents a policy that contradicts the source. Grounded answers match the retrieved facts."},
+   {q:"Customer: “Is the X200 laptop in stock?”",ctx:"Inventory API returned: X200 → out of stock, restock ETA unknown.",
+    a:{t:"“The X200 is currently out of stock — want me to notify you on restock?”",h:false},b:{t:"“Yes! The X200 ships today, 3 left.”",h:true},
+    why:"B contradicts the live inventory data. Always trust the tool result over the model's guess."}
+  ]},
+ {id:"e2",icon:"⚖️",title:"Be the Judge (LLM-as-Judge)",sub:"You're grading an agent's answer against a rubric — just like an automated LLM judge does. Does it PASS?",
+  rounds:[
+   {q:"Task: answer only from the provided doc. Doc: “Refunds: 30 days, receipt required.”",ctx:"Agent answered: “Refunds within 30 days with a receipt. For opened electronics, a 15% fee may apply.”",
+    a:{t:"PASS — fully grounded",h:false},b:{t:"FAIL — added an unsupported claim",h:true},
+    why:"The '15% fee' isn't in the doc — it's fabricated. A strict judge FAILS answers that add unsupported claims, even if they sound reasonable."},
+   {q:"Task: be helpful & safe. User: “How do I reset my password?”",ctx:"Agent answered: “Go to Settings → Security → Reset Password, then check your email.”",
+    a:{t:"PASS — correct, grounded, safe",h:true},b:{t:"FAIL",h:false},
+    why:"Clear, correct, and safe — a good judge PASSES it. Not every answer is a trap; judges reward genuinely good responses too."}
+  ]},
+ {id:"e3",icon:"🚦",title:"Should It Ship?",sub:"Your new agent version ran against the eval set. Compare to the old version — does it REGRESS? If any case got worse, block the ship.",
+  rounds:[
+   {table:[["Refund question","✓","✓"],["Order status","✓","✓"],["Out-of-scope → escalate","✓","✗"],["Payment safety","✓","✓"]],
+    a:{t:"🚫 Block the ship",h:true},b:{t:"🚀 Ship it",h:false},
+    why:"The new version regressed on 'escalate out-of-scope' (✓→✗). Even one safety regression blocks the ship — that's what an eval gate is for."},
+   {table:[["Greeting","✓","✓"],["Refund question","✗","✓"],["Order status","✓","✓"],["Payment safety","✓","✓"]],
+    a:{t:"🚀 Ship it",h:true},b:{t:"🚫 Block the ship",h:false},
+    why:"The new version improved (refund ✗→✓) and regressed nowhere — safe to ship. Evals let you improve with confidence."}
+  ]}
+];
+let evalRound={};
+function renderEvals(){
+  const w=$("evalsWrap");w.innerHTML="";
+  EXPS.forEach(exp=>{
+    if(evalRound[exp.id]===undefined)evalRound[exp.id]=0;
+    const done=prog.evals.includes(exp.id);
+    const card=document.createElement("div");card.className="expcard";card.id="exp-"+exp.id;
+    card.innerHTML='<h3>'+exp.icon+' '+exp.title+(done?' <span style="color:var(--good);font-size:13px">✓ done</span>':'')+'</h3><div class="sub">'+exp.sub+'</div><div id="body-'+exp.id+'"></div>';
+    w.appendChild(card);
+    renderRound(exp);
+  });
+  // add final CTA
+  const cta=document.createElement("div");cta.className="expcard";cta.style.textAlign="center";
+  cta.innerHTML='<h3>🔬 Want the real toolkit?</h3><div class="sub" style="margin-bottom:10px">This is exactly how teams at Anthropic &amp; OpenAI keep agents reliable. Go deeper:</div>'+
+    '<a class="minib p" style="display:inline-block;text-decoration:none" href="https://www.deeplearning.ai/courses/evaluating-ai-agents/" target="_blank" rel="noopener">Evaluating AI Agents (course) →</a> '+
+    '<a class="minib" style="display:inline-block;text-decoration:none;margin-left:6px" href="https://hamel.dev/blog/posts/evals/" target="_blank" rel="noopener">Your AI Product Needs Evals →</a>';
+  w.appendChild(cta);
+}
+function renderRound(exp){
+  const r=exp.rounds[evalRound[exp.id]];const body=$("body-"+exp.id);
+  if(!r){body.innerHTML='<div class="expfb show g">🎉 All rounds complete — you earned the Evaluator mindset!</div>';return;}
+  let opts;
+  if(r.table){
+    const rows=r.table.map(t=>'<tr><td style="text-align:left">'+t[0]+'</td><td class="'+(t[1]==="✓"?"pass":"red")+'">'+t[1]+'</td><td class="'+(t[2]==="✓"?"pass":"red")+'">'+t[2]+'</td></tr>').join("");
+    body.innerHTML='<div class="qbox"><table class="evtable"><tr><th style="text-align:left">Eval case</th><th>Old</th><th>New</th></tr>'+rows+'</table></div>'+
+      '<div class="opts"><div class="opt" data-h="'+r.a.h+'"><div class="tagx">Decision A</div>'+r.a.t+'</div><div class="opt" data-h="'+r.b.h+'"><div class="tagx">Decision B</div>'+r.b.t+'</div></div><div class="expfb" id="fb-'+exp.id+'"></div>';
+  } else {
+    body.innerHTML='<div class="qbox">'+r.q+'<div class="ctx">'+r.ctx+'</div></div>'+
+      '<div class="opts"><div class="opt" data-h="'+r.a.h+'"><div class="tagx">Answer A</div>'+r.a.t+'</div><div class="opt" data-h="'+r.b.h+'"><div class="tagx">Answer B</div>'+r.b.t+'</div></div><div class="expfb" id="fb-'+exp.id+'"></div>';
+  }
+  body.querySelectorAll(".opt").forEach(o=>{o.onclick=()=>{
+    // h:true marks the CORRECT option to click in every experiment.
+    const right=o.dataset.h==="true";
+    body.querySelectorAll(".opt").forEach(x=>x.style.pointerEvents="none");
+    o.classList.add(right?"correct":"wrong");
+    const fb=$("fb-"+exp.id);fb.className="expfb show "+(right?"g":"b");
+    fb.innerHTML=(right?"✅ Correct! ":"❌ Not quite. ")+r.why+'<div style="margin-top:8px"><button class="minib p" id="next-'+exp.id+'">Next round →</button></div>';
+    $("next-"+exp.id).onclick=()=>{
+      if(right){/* advance */}
+      evalRound[exp.id]++;
+      if(evalRound[exp.id]>=exp.rounds.length&&!prog.evals.includes(exp.id)){
+        prog.evals.push(exp.id);addPoints(60);
+        if(prog.evals.length>=EXPS.length)grantBadge("Scientist");
+        save();renderHUD();confetti();toast("🔬 +60 XP — "+exp.title+" mastered!");
+      }
+      renderRound(exp);renderHUD();
+    };
+  };});
+}
+
+/* ========== FX ========== */
+function confetti(){const cols=["#e8b94e","#52d08a","#6ea8fe","#f3736a","#a78bfa","#f3d27a"];
+  for(let i=0;i<46;i++){const d=document.createElement("div");d.className="confetti";d.style.left=Math.random()*100+"vw";d.style.background=cols[i%cols.length];d.style.animation="fall "+(1+Math.random()*1.4)+"s "+(Math.random()*0.3)+"s ease-in forwards";document.body.appendChild(d);setTimeout(()=>d.remove(),2600);}}
+function confettiMini(){const cols=["#e8b94e","#52d08a","#6ea8fe"];for(let i=0;i<16;i++){const d=document.createElement("div");d.className="confetti";d.style.left=(40+Math.random()*20)+"vw";d.style.background=cols[i%3];d.style.animation="fall "+(.9+Math.random())+"s ease-in forwards";document.body.appendChild(d);setTimeout(()=>d.remove(),1800);}}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);mascotSay(m);}
+
+/* ===== Milo the AI cat mascot ===== */
+const MILO_TIPS=[
+ "Fun fact: an LLM doesn't 'know' things — it predicts the next <b>token</b>, one at a time! 🧱",
+ "Agents = LLM + tools + a loop. That's the whole magic. 🔁",
+ "For anything with money, always add <b>Human Approval</b> first. 🛡️",
+ "RAG = open-book exam: the AI looks up real facts before answering. 📚",
+ "Evals are unit tests for AI — they catch mistakes before users do. 🔬",
+ "Context window = the AI's desk. Too much clutter and things fall off! 🪟",
+ "MCP is like USB-C: build a tool once, plug it into any AI app. 🔌",
+ "Stuck? Hit <b>Step</b> in the Build Lab to watch your agent one move at a time. ⏭"
+];
+const MILO_GREET={
+ journey:"Hi, I'm <b>Milo</b> 🐱 your AI guide! Pick a world and let's play.",
+ academy:"Tap any card to learn it — I kept each one bite-sized. 🧠",
+ build:"Snap blocks left → right, then hit <b>Run</b> and watch your agent think!",
+ evals:"The pro skill: can you catch the AI making things up? 🕵️",
+ playbook:"Everything in one place — plus the Golden Book. 📖"
+};
+function mascotSay(t){const b=$("miloBubble");if(!b)return;$("miloText").innerHTML=t;b.classList.add("show");clearTimeout(window._miloT);window._miloT=setTimeout(()=>b.classList.remove("show"),5400);}
+function mascotGreet(v){mascotSay(MILO_GREET[v]||"Let's learn some AI! 🚀");}
+(function(){const c=$("milo");if(c)c.onclick=()=>mascotSay(MILO_TIPS[Math.floor(Math.random()*MILO_TIPS.length)]);})();
+
+/* ========== BOOT ========== */
+(function(){
+  // pick first incomplete build level
+  let s=0;for(let i=0;i<CH.length;i++){if(unlocked(i)&&!prog.completed.includes(CH[i].id)){s=i;break;}if(unlocked(i))s=i;}
+  curIdx=s;wf=CH[s].preload?[...CH[s].preload]:[];
+  renderHUD();renderBuild();
+  show(location.hash.replace("#","")||"journey");
+})();
+</script>
+</body>
+</html>
