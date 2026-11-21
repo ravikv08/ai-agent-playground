@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Agent Golden Book</title>
+<meta name="description" content="One ordered path from curious beginner to enterprise AI-agent architect: foundations, building, harness, evals, production, enterprise architecture, and the frontier.">
+<style>
+  :root{
+    --bg:#0a0c12;--panel:#141922;--panel2:#1a2030;--line:#283142;--line2:#36425a;
+    --ink:#f0f4fa;--muted:#a3b0c2;--dim:#6c7a8e;
+    --brand:#d97757;--brand2:#e8a87c;--accent:#6ea8fe;--teal:#2fb8a6;--good:#5bc98d;--purple:#a78bfa;
+    --gold:#e8b94e;--gold2:#f3d27a;--red:#f27a72;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.62;font-size:15.5px}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+  .layout{display:grid;grid-template-columns:272px 1fr;min-height:100vh}
+  aside{position:sticky;top:0;height:100vh;overflow-y:auto;background:linear-gradient(180deg,#0d1017,#080a0f);border-right:1px solid var(--line);padding:22px 14px}
+  aside .brand{font-weight:850;font-size:15.5px;line-height:1.25;letter-spacing:-.2px}
+  aside .brand .g{background:linear-gradient(90deg,var(--gold),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  aside .sub{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:1.6px;margin:4px 0 18px}
+  nav a{display:block;color:var(--muted);padding:6px 10px;border-radius:8px;font-size:12.9px;margin-bottom:1px;border-left:2px solid transparent}
+  nav a:hover{background:var(--panel);color:var(--ink);text-decoration:none}
+  nav a.active{background:var(--panel2);color:var(--ink);border-left:2px solid var(--gold)}
+  nav a .n{display:inline-block;width:26px;color:var(--dim);font-family:var(--mono);font-size:10.5px}
+  nav .grp{color:var(--gold2);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;margin:16px 0 6px 10px;font-weight:700}
+  main{max-width:1000px}
+  .wrap{padding:22px 54px 90px}
+  header.hero{padding:62px 54px 38px;background:radial-gradient(1100px 440px at 15% -10%,rgba(232,185,78,.17),transparent),radial-gradient(900px 440px at 90% 0%,rgba(217,119,87,.13),transparent);border-bottom:1px solid var(--line)}
+  .kicker{color:var(--gold);font-weight:700;letter-spacing:2.5px;text-transform:uppercase;font-size:11.5px;margin-bottom:14px}
+  h1.title{font-size:46px;line-height:1.04;margin:0 0 16px;font-weight:850;letter-spacing:-1.2px}
+  h1.title .g{background:linear-gradient(90deg,var(--gold),var(--gold2),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:17.5px;color:var(--muted);max-width:770px}
+  .meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px;color:var(--muted)}
+  .chip b{color:var(--gold2)}
+  .ladder{display:flex;gap:6px;flex-wrap:wrap;margin:26px 0 4px}
+  .rung{flex:1;min-width:116px;border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:10px;padding:10px 12px;background:var(--panel)}
+  .rung .r{font-family:var(--mono);font-size:10px;color:var(--gold2)}
+  .rung .t{font-weight:700;font-size:13px;margin-top:2px}
+  .rung .x{font-size:11px;color:var(--dim)}
+  h2.ch{font-size:26px;margin:4px 0 2px;font-weight:830;letter-spacing:-.4px;scroll-margin-top:14px}
+  h2.ch .cn{color:var(--gold);font-family:var(--mono);font-size:14px;margin-right:12px;font-weight:700;border:1px solid var(--line2);border-radius:7px;padding:3px 10px}
+  .goal{color:var(--muted);font-size:14.5px;margin:10px 0 2px}
+  .outcome{display:inline-block;background:rgba(232,185,78,.12);border:1px solid rgba(232,185,78,.32);color:var(--gold2);border-radius:8px;padding:6px 13px;font-size:13px;margin:12px 0 2px}
+  .outcome b{color:var(--gold)}
+  h3{font-size:16px;margin:24px 0 6px;font-weight:700;color:var(--brand2)}
+  p{margin:11px 0}
+  .section{padding:28px 0;border-bottom:1px solid var(--line)}
+  .section-tag{display:inline-block;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:16px 0}
+  .card.tint{background:linear-gradient(180deg,var(--panel2),var(--panel))}
+  .res{display:flex;gap:14px;align-items:flex-start;padding:13px 15px;border:1px solid var(--line);border-radius:11px;margin:8px 0;background:var(--panel2);transition:.15s}
+  .res:hover{border-color:var(--gold);transform:translateX(2px)}
+  .res.feat{border-color:rgba(232,185,78,.5);background:linear-gradient(180deg,rgba(232,185,78,.07),var(--panel2))}
+  .res .ix{font-family:var(--mono);font-size:12px;color:var(--gold);min-width:16px;padding-top:2px;font-weight:700}
+  .res .m{flex:1;min-width:0}
+  .res .tt{font-weight:650;font-size:15px}
+  .res .tt a{color:var(--ink)}.res .tt a:hover{color:var(--accent)}
+  .res .by{color:var(--dim);font-size:12px}
+  .res .why{color:var(--muted);font-size:13px;margin-top:4px}
+  .res .rt{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:70px;text-align:right}
+  .typ{font-size:9.5px;font-weight:800;letter-spacing:.5px;padding:3px 8px;border-radius:6px;text-transform:uppercase;white-space:nowrap}
+  .t-video{background:rgba(242,122,114,.16);color:#f27a72}.t-course{background:rgba(110,168,254,.16);color:var(--accent)}
+  .t-blog{background:rgba(217,119,87,.16);color:var(--brand2)}.t-docs{background:rgba(47,184,166,.16);color:var(--teal)}
+  .t-book{background:rgba(230,180,85,.16);color:var(--gold2)}.t-paper{background:rgba(167,139,250,.16);color:var(--purple)}
+  .t-cert{background:rgba(232,185,78,.18);color:var(--gold)}.t-site{background:rgba(159,173,191,.14);color:var(--muted)}
+  .tm{font-size:11px;color:var(--dim);font-family:var(--mono)}
+  .callout{border-left:3px solid var(--gold);background:var(--panel2);padding:13px 17px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14px}
+  .callout.good{border-color:var(--good)}.callout.blue{border-color:var(--accent)}
+  .callout b{color:var(--ink)}.callout .h{font-weight:750;margin-bottom:3px;display:block}
+  .pull{font-size:19px;line-height:1.45;color:var(--ink);border-left:3px solid var(--gold);padding:6px 0 6px 20px;margin:20px 0;font-weight:550}
+  .pull .a{color:var(--gold2);font-size:13px;display:block;margin-top:8px;font-weight:600}
+  figure{margin:24px 0 8px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:18px 14px 10px;overflow-x:auto}
+  figure svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  figcaption{color:var(--muted);font-size:12.5px;margin-top:10px;text-align:center;padding:0 8px}
+  figcaption b{color:var(--gold2)}
+  .syll{margin:10px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .syll .row{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid var(--line);font-size:13px}
+  .syll .row:last-child{border-bottom:none}
+  .syll .row:hover{background:var(--panel2)}
+  .syll .k{font-family:var(--mono);color:var(--gold);font-size:11px;min-width:20px}
+  .syll .lb{flex:1;color:var(--ink)}
+  .syll .lb a{color:var(--ink)}
+  .syll .lab{font-size:9.5px;font-weight:700;letter-spacing:.4px;padding:2px 7px;border-radius:5px;text-transform:uppercase}
+  .lab-lab{background:rgba(110,168,254,.16);color:var(--accent)}
+  .lab-vid{background:rgba(242,122,114,.14);color:#f27a72}
+  .syll .d{font-family:var(--mono);color:var(--dim);font-size:11px;min-width:30px;text-align:right}
+  .watch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  @media(max-width:640px){.watch{grid-template-columns:1fr}}
+  .wv{display:flex;gap:12px;align-items:center;padding:11px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);transition:.15s}
+  .wv:hover{border-color:#f27a72;text-decoration:none;transform:translateY(-2px)}
+  .play{flex:none;width:32px;height:32px;border-radius:9px;background:rgba(242,122,114,.16);display:flex;align-items:center;justify-content:center}
+  .play svg{width:14px;height:14px;fill:#f27a72}
+  .wv .l{min-width:0}.wv .l .wt{font-weight:650;font-size:13px;color:var(--ink)}
+  .wv .l .wu{font-size:10.5px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  footer{padding:40px 54px;color:var(--dim);font-size:12.5px;border-top:1px solid var(--line)}
+  .backtop{position:fixed;bottom:22px;right:22px;background:var(--gold);color:#12161c;border:none;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.45);display:none;z-index:50}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0;z-index:60}
+  @media(max-width:820px){.layout{grid-template-columns:1fr}aside{display:none}.wrap,header.hero,footer{padding-left:22px;padding-right:22px}h1.title{font-size:32px}}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="layout">
+  <aside>
+    <div class="brand">The Agent<br><span class="g">Golden Book</span></div>
+    <div class="sub">Novice → Architect</div>
+    <nav id="nav">
+      <a href="#how"><span class="n">00</span>How to Use This Book</a>
+      <a href="#five"><span class="n">★</span>The Five-Stop Shortcut</a>
+      <div class="grp">The Seven Chapters</div>
+      <a href="#c1"><span class="n">I</span>Foundations</a>
+      <a href="#c2"><span class="n">II</span>Build Your First Agent</a>
+      <a href="#c3"><span class="n">III</span>The Harness</a>
+      <a href="#c4"><span class="n">IV</span>Evaluate (the Golden Skill)</a>
+      <a href="#c5"><span class="n">V</span>Ship to Production</a>
+      <a href="#c6"><span class="n">VI</span>Architect the Enterprise</a>
+      <a href="#c7"><span class="n">VII</span>The Frontier</a>
+      <div class="grp">Close</div>
+      <a href="#capstone">The Capstone</a>
+      <a href="#map">The Whole Map</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="hero">
+      <div class="kicker">A One-Stop Ordered Path · 7 Chapters · Novice → Enterprise Architect</div>
+      <h1 class="title">The <span class="g">Agent Golden Book</span></h1>
+      <p class="lede">Everything to become an agent engineer, in the right order: understand LLMs, build your first agent, harness it, <b>evaluate</b> it, ship it to production, architect it for the enterprise, and reach the research frontier. Hand-picked must-reads, real courses, and the frontier benchmarks — one path, no filler.</p>
+      <div class="ladder">
+        <div class="rung"><div class="r">CH I–II</div><div class="t">Learn</div><div class="x">LLMs &amp; first agent</div></div>
+        <div class="rung"><div class="r">CH III–IV</div><div class="t">Strengthen</div><div class="x">harness &amp; evals</div></div>
+        <div class="rung"><div class="r">CH V</div><div class="t">Ship</div><div class="x">production</div></div>
+        <div class="rung"><div class="r">CH VI</div><div class="t">Architect</div><div class="x">enterprise</div></div>
+        <div class="rung"><div class="r">CH VII</div><div class="t">Frontier</div><div class="x">multi-agent &amp; research</div></div>
+      </div>
+    </header>
+
+    <div class="wrap">
+
+    <!-- HOW -->
+    <section class="section" id="how">
+      <div class="section-tag">Front Matter</div>
+      <h2 class="ch"><span class="cn">00</span>How to Use This Book</h2>
+      <p>This is a <b>path</b>, not a pile of links. Each chapter has a goal, a "you can now…" outcome, a short ordered reading/watching list (⭐ = the must-do spine), and a hands-on build. Go in order; the chapters compound. You can go from total beginner to someone who architects enterprise multi-agent systems by walking straight down it.</p>
+      <div class="card tint">
+        <h3 style="margin-top:0;color:var(--gold2)">Four rules</h3>
+        <p style="margin:6px 0"><b>1 · In order.</b> Each chapter assumes the last. Skipping foundations is why demos die in production.</p>
+        <p style="margin:6px 0"><b>2 · Build at every chapter.</b> Watching ≠ learning. Ship the tiny project each time.</p>
+        <p style="margin:6px 0"><b>3 · The ⭐ spine first.</b> Do the starred items, then circle back for depth.</p>
+        <p style="margin:6px 0"><b>4 · Evals are the golden skill (Ch IV).</b> Anyone can demo an agent. Knowing it's good — and catching when it breaks — is the craft. The whole book bends toward it.</p>
+      </div>
+      <div class="callout"><span class="h">The one law of this book</span><b>Evaluation-driven development.</b> You don't improve an agent by vibes — you improve it against a dataset, with experiments that act as gates for shipping. Collect feedback → add to a golden dataset → run the experiment → only ship if it passes. Internalize this loop (Chapter IV draws it) and everything else falls into place.</div>
+    </section>
+
+    <!-- FIVE -->
+    <section class="section" id="five">
+      <div class="section-tag">The Shortcut</div>
+      <h2 class="ch"><span class="cn">★</span>The Five-Stop Shortcut</h2>
+      <p class="goal">No time for all seven chapters yet? Do these five, in order. It alone takes you from zero to production-literate.</p>
+      <div class="card">
+        <p style="margin:6px 0"><b>1 · What an LLM/agent is</b> — Karpathy <i>Intro to LLMs</i> + Lilian Weng <i>LLM Powered Autonomous Agents</i></p>
+        <p style="margin:6px 0"><b>2 · The patterns</b> — Anthropic <i>Building Effective Agents</i></p>
+        <p style="margin:6px 0"><b>3 · Build one</b> — Hugging Face <i>AI Agents Course</i></p>
+        <p style="margin:6px 0"><b>4 · Evaluate it</b> — DeepLearning.AI <i>Evaluating AI Agents</i> + Hamel <i>Your AI Product Needs Evals</i></p>
+        <p style="margin:6px 0"><b>5 · Ship it</b> — <i>What We Learned from a Year of Building with LLMs</i></p>
+      </div>
+    </section>
+
+    <!-- CH I -->
+    <section class="section" id="c1">
+      <div class="section-tag">Chapter I · Learn</div>
+      <h2 class="ch"><span class="cn">I</span>Foundations — Understand LLMs &amp; Agents</h2>
+      <p class="goal"><b>Goal:</b> a correct mental model of how LLMs work and what an "agent" really is — so nothing downstream feels like magic.</p>
+      <div class="outcome">✓ You can now <b>explain</b> what an LLM does and what makes a system an agent (planning + memory + tools).</div>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://www.youtube.com/watch?v=zjkBMFhNj_g" target="_blank" rel="noopener">Intro to Large Language Models (1 hr)</a></div><div class="by">Andrej Karpathy</div><div class="why">The single best hour on what an LLM is, how it's trained, and why it behaves the way it does. Start here.</div></div><div class="rt"><span class="typ t-video">Video</span><span class="tm">~1 hr</span></div></div>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank" rel="noopener">LLM Powered Autonomous Agents</a></div><div class="by">Lilian Weng (Lil'Log)</div><div class="why">The canonical overview of the agent anatomy: planning, memory, and tool use. The mental model every builder shares.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~40 min</span></div></div>
+      <div class="res"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener">Building Effective Agents</a></div><div class="by">Anthropic</div><div class="why">Workflow vs. agent, and the handful of patterns that cover almost everything. Re-read before every project.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~25 min</span></div></div>
+      <div class="res"><div class="ix">4</div><div class="m"><div class="tt"><a href="https://www.3blue1brown.com/topics/neural-networks" target="_blank" rel="noopener">Neural Networks / "But what is a GPT?"</a></div><div class="by">3Blue1Brown</div><div class="why">The clearest visual intuition for transformers and attention. Optional but worth it if anything felt fuzzy.</div></div><div class="rt"><span class="typ t-video">Video</span><span class="tm">~2 hrs</span></div></div>
+      <div class="callout good"><span class="h">🔨 Build it</span>Use a frontier model for a real task and, on paper, label where it planned, where it would need a tool, and where it would need memory. You've just drawn your first agent.</div>
+    </section>
+
+    <!-- CH II -->
+    <section class="section" id="c2">
+      <div class="section-tag">Chapter II · Learn</div>
+      <h2 class="ch"><span class="cn">II</span>Build Your First Agent</h2>
+      <p class="goal"><b>Goal:</b> go from a single model call to a real agent — one that uses tools, grounds answers in data, and loops toward a goal.</p>
+      <div class="outcome">✓ You can now <b>build a working agent</b> that calls tools, does RAG, and decides its own next step.</div>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://huggingface.co/learn/agents-course" target="_blank" rel="noopener">AI Agents Course</a></div><div class="by">Hugging Face</div><div class="why">Free, hands-on, build-and-ship. The fastest way from reading about agents to having built one.</div></div><div class="rt"><span class="typ t-course">Course</span><span class="tm">free</span></div></div>
+      <div class="res"><div class="ix">2</div><div class="m"><div class="tt"><a href="https://www.anthropic.com/engineering/writing-tools-for-agents" target="_blank" rel="noopener">Writing Effective Tools for Agents</a></div><div class="by">Anthropic</div><div class="why">An agent is only as good as its tools. The highest-leverage reliability work after the prompt.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~20 min</span></div></div>
+      <div class="res"><div class="ix">3</div><div class="m"><div class="tt"><a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">Model Context Protocol (MCP)</a></div><div class="by">Anthropic / open standard</div><div class="why">The standard for connecting agents to tools and data. Skim the docs; build one server.</div></div><div class="rt"><span class="typ t-docs">Docs</span><span class="tm">ref</span></div></div>
+      <div class="callout good"><span class="h">🔨 Build it</span>Build an agent that answers questions about <i>your</i> documents (RAG) and can take one real action via a tool. That's a complete agent — everything after this makes it good, safe, and scalable.</div>
+    </section>
+
+    <!-- CH III -->
+    <section class="section" id="c3">
+      <div class="section-tag">Chapter III · Strengthen</div>
+      <h2 class="ch"><span class="cn">III</span>The Harness — Context, Memory &amp; Long-Running Agents</h2>
+      <p class="goal"><b>Goal:</b> the discipline that keeps agents reliable beyond a single turn — managing the context window, memory, and multi-step work. This is the "harness."</p>
+      <div class="outcome">✓ You can now <b>keep an agent coherent and reliable</b> across long, multi-step tasks.</div>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Effective Context Engineering for AI Agents</a></div><div class="by">Anthropic</div><div class="why">The successor to "prompt engineering": curate the token window, compact, take notes. The core reliability discipline.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~20 min</span></div></div>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://www.anthropic.com/research/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">Effective Harnesses for Long-Running Agents</a></div><div class="by">Anthropic</div><div class="why">How to structure agents that span many context windows: state files, checkpoints, incremental execution, built-in verification.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~25 min</span></div></div>
+      <div class="res"><div class="ix">3</div><div class="m"><div class="tt"><a href="https://www.anthropic.com/engineering/multi-agent-research-system" target="_blank" rel="noopener">How We Built Our Multi-Agent Research System</a></div><div class="by">Anthropic</div><div class="why">A real orchestrator-worker architecture — when multi-agent is worth it (and when it isn't), with hard-won lessons.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~25 min</span></div></div>
+      <div class="callout good"><span class="h">🔨 Build it</span>Give your agent a task that needs 6+ steps. Add a progress/state file and compaction so it survives a restart mid-task. Now it's harnessed.</div>
+    </section>
+
+    <!-- CH IV -->
+    <section class="section" id="c4">
+      <div class="section-tag">Chapter IV · Strengthen · ★ the heart of the book</div>
+      <h2 class="ch"><span class="cn">IV</span>Evaluate — The Golden Skill</h2>
+      <p class="goal"><b>Goal:</b> measure quality instead of guessing. Build datasets, trace runs, grade with code + LLM-judge, and gate every change. This is what separates engineers from demo-builders.</p>
+      <div class="outcome">✓ You can now <b>prove whether a change made your agent better or worse</b>, trace any run, and gate shipping on experiments.</div>
+      <div class="pull">"The agent that produces a result should never be the only thing that judges it. Build the dataset, run the experiment, let it gate the ship."<span class="a">— evaluation-driven development, the law of this book</span></div>
+
+      <figure>
+        <svg viewBox="0 0 860 300" role="img" aria-label="Evaluation-driven development loop">
+          <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#e8b94e"/></marker>
+          <marker id="arb" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#6c7a8e"/></marker></defs>
+          <text x="430" y="22" text-anchor="middle" fill="#f0f4fa" font-family="-apple-system,Segoe UI,sans-serif" font-size="14" font-weight="800">Evaluation-Driven Development in Production</text>
+          <!-- top runtime row -->
+          <g font-family="-apple-system,Segoe UI,sans-serif">
+            <circle cx="60" cy="75" r="26" fill="#1a2030" stroke="#6ea8fe"/><text x="60" y="79" text-anchor="middle" fill="#f0f4fa" font-size="11">User</text>
+            <rect x="130" y="52" width="120" height="46" rx="10" fill="#1a2030" stroke="#d97757"/><text x="190" y="72" text-anchor="middle" fill="#f0f4fa" font-size="10.5" font-weight="700">Router</text><text x="190" y="88" text-anchor="middle" fill="#a3b0c2" font-size="9.5">function calling</text>
+            <rect x="282" y="52" width="110" height="46" rx="10" fill="#1a2030" stroke="#283142"/><text x="337" y="72" text-anchor="middle" fill="#f0f4fa" font-size="10.5" font-weight="700">Tools</text><text x="337" y="88" text-anchor="middle" fill="#a3b0c2" font-size="9.5">lookup · analyze</text>
+            <rect x="424" y="52" width="120" height="46" rx="10" fill="#1a2030" stroke="#d97757"/><text x="484" y="72" text-anchor="middle" fill="#f0f4fa" font-size="10.5" font-weight="700">Router</text><text x="484" y="88" text-anchor="middle" fill="#a3b0c2" font-size="9.5">respond</text>
+            <circle cx="610" cy="75" r="26" fill="#1a2030" stroke="#6ea8fe"/><text x="610" y="79" text-anchor="middle" fill="#f0f4fa" font-size="11">User</text>
+            <line x1="86" y1="75" x2="128" y2="75" stroke="#6c7a8e" stroke-width="1.6" marker-end="url(#arb)"/>
+            <line x1="250" y1="75" x2="280" y2="75" stroke="#6c7a8e" stroke-width="1.6" marker-end="url(#arb)"/>
+            <line x1="392" y1="75" x2="422" y2="75" stroke="#6c7a8e" stroke-width="1.6" marker-end="url(#arb)"/>
+            <line x1="544" y1="75" x2="582" y2="75" stroke="#6c7a8e" stroke-width="1.6" marker-end="url(#arb)"/>
+            <!-- feedback -->
+            <text x="690" y="60" text-anchor="middle" fill="#5bc98d" font-size="11">👍</text><text x="710" y="60" text-anchor="middle" fill="#f27a72" font-size="11">👎</text>
+            <text x="700" y="100" text-anchor="middle" fill="#a3b0c2" font-size="9.5">collect feedback + traces</text>
+            <!-- self improvement box -->
+            <rect x="150" y="150" width="620" height="118" rx="14" fill="#0d1017" stroke="#e8b94e" stroke-dasharray="6,5"/>
+            <text x="235" y="140" fill="#e8b94e" font-size="11" font-weight="800">SELF-IMPROVEMENT LOOP (the gate)</text>
+            <rect x="590" y="186" width="150" height="46" rx="10" fill="#15241c" stroke="#5bc98d"/><text x="665" y="206" text-anchor="middle" fill="#f0f4fa" font-size="10.5" font-weight="700">Add to golden dataset</text><text x="665" y="221" text-anchor="middle" fill="#a3b0c2" font-size="9">failure modes + baseline</text>
+            <rect x="400" y="186" width="150" height="46" rx="10" fill="#15241c" stroke="#5bc98d"/><text x="475" y="203" text-anchor="middle" fill="#f0f4fa" font-size="10.5" font-weight="700">Run CI/CD experiment</text><text x="475" y="219" text-anchor="middle" fill="#a3b0c2" font-size="9">pass 4/5 → <tspan fill="#f27a72">3/5</tspan>? block</text>
+            <rect x="210" y="186" width="150" height="46" rx="10" fill="#15241c" stroke="#5bc98d"/><text x="285" y="203" text-anchor="middle" fill="#f0f4fa" font-size="10.5" font-weight="700">Iterate</text><text x="285" y="219" text-anchor="middle" fill="#a3b0c2" font-size="9">logic · model · prompt</text>
+            <line x1="588" y1="209" x2="552" y2="209" stroke="#e8b94e" stroke-width="1.8" marker-end="url(#ar)"/>
+            <line x1="398" y1="209" x2="362" y2="209" stroke="#e8b94e" stroke-width="1.8" marker-end="url(#ar)"/>
+            <!-- feedback from user into dataset -->
+            <path d="M636,96 L700,150 L690,186" fill="none" stroke="#6c7a8e" stroke-width="1.4" stroke-dasharray="4,3" marker-end="url(#arb)"/>
+            <!-- iterate back to tools -->
+            <path d="M285,186 L285,120 L337,100" fill="none" stroke="#e8b94e" stroke-width="1.8" marker-end="url(#ar)"/>
+          </g>
+          <text x="430" y="288" text-anchor="middle" fill="#a3b0c2" font-size="10.5">Every user interaction feeds a dataset; every change must pass the experiment before it ships. The loop never stops.</text>
+        </svg>
+        <figcaption><b>The loop that defines the craft.</b> Real users → collect feedback &amp; traces → grow a <b>golden dataset</b> of failure modes → run an experiment that <b>gates</b> the change (a drop from 4/5 to 3/5 blocks the ship) → iterate on logic/model/prompt → back to production. Chapter IV's course teaches you to build exactly this.</figcaption>
+      </figure>
+
+      <h3>Read &amp; do — in order</h3>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://hamel.dev/blog/posts/evals/" target="_blank" rel="noopener">Your AI Product Needs Evals</a></div><div class="by">Hamel Husain</div><div class="why">The essay that made evals mainstream. Read it twice — it reframes how you build everything.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~30 min</span></div></div>
+      <div class="res"><div class="ix">2</div><div class="m"><div class="tt"><a href="https://www.anthropic.com/research/demystifying-evals-for-ai-agents" target="_blank" rel="noopener">Demystifying Evals for AI Agents</a></div><div class="by">Anthropic</div><div class="why">The authoritative vocabulary — graders, transcripts, capability vs. regression — and how to catch regressions before users do.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~30 min</span></div></div>
+      <div class="res"><div class="ix">3</div><div class="m"><div class="tt"><a href="https://hamel.dev/blog/posts/llm-judge/" target="_blank" rel="noopener">Creating an LLM-as-a-Judge That Drives Business Results</a></div><div class="by">Hamel Husain</div><div class="why">How to build an LLM judge you can actually trust — align it to human labels instead of hand-waving.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~40 min</span></div></div>
+      <div class="res"><div class="ix">4</div><div class="m"><div class="tt"><a href="https://arize.com/docs/phoenix/tracing/concepts-tracing/what-are-traces" target="_blank" rel="noopener">What Are Traces (Arize Phoenix)</a></div><div class="by">Arize AI · Phoenix docs</div><div class="why">You can't evaluate what you can't see. Learn spans, traces, and span kinds (LLM/Retriever/Tool/Agent) — the observability foundation.</div></div><div class="rt"><span class="typ t-docs">Docs</span><span class="tm">~20 min</span></div></div>
+
+      <h3 style="color:var(--gold2)">★ The featured hands-on course — build the whole loop above</h3>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://www.deeplearning.ai/courses/evaluating-ai-agents/" target="_blank" rel="noopener">Evaluating AI Agents</a></div><div class="by">DeepLearning.AI × Arize (John Gilhuly, Aman Khan)</div><div class="why">The single best hands-on course for this chapter: decompose an agent, trace it, add router/skill/trajectory evals, structure them, and build an LLM judge. Do every lab.</div></div><div class="rt"><span class="typ t-course">Course</span><span class="tm">~2.5 hrs</span></div></div>
+      <div class="syll">
+        <div class="row"><span class="k">1</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/sqkza/introduction" target="_blank" rel="noopener">Introduction</a></span><span class="lab lab-vid">Video</span><span class="d">3m</span></div>
+        <div class="row"><span class="k">2</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/gz8ys/evaluation-in-the-time-of-llms" target="_blank" rel="noopener">Evaluation in the time of LLMs</a></span><span class="lab lab-vid">Video</span><span class="d">7m</span></div>
+        <div class="row"><span class="k">3</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/hvoxa/decomposing-agents" target="_blank" rel="noopener">Decomposing agents</a></span><span class="lab lab-vid">Video</span><span class="d">6m</span></div>
+        <div class="row"><span class="k">4</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/pag5y/lab-1%3A-building-your-agent" target="_blank" rel="noopener">Lab 1 — Building your agent</a></span><span class="lab lab-lab">Lab</span><span class="d">16m</span></div>
+        <div class="row"><span class="k">5</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/uymu6/tracing-agents" target="_blank" rel="noopener">Tracing agents</a></span><span class="lab lab-vid">Video</span><span class="d">4m</span></div>
+        <div class="row"><span class="k">6</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/njjlv/lab-2%3A-tracing-your-agent" target="_blank" rel="noopener">Lab 2 — Tracing your agent</a></span><span class="lab lab-lab">Lab</span><span class="d">16m</span></div>
+        <div class="row"><span class="k">7</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/x3i1d/adding-router-and-skill-evaluations" target="_blank" rel="noopener">Adding router &amp; skill evaluations</a></span><span class="lab lab-vid">Video</span><span class="d">12m</span></div>
+        <div class="row"><span class="k">8</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/yx7uz/lab-3%3A-adding-router-and-skill-evaluations" target="_blank" rel="noopener">Lab 3 — Router &amp; skill evaluations</a></span><span class="lab lab-lab">Lab</span><span class="d">17m</span></div>
+        <div class="row"><span class="k">9</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/xdfwr/adding-trajectory-evaluations" target="_blank" rel="noopener">Adding trajectory evaluations</a></span><span class="lab lab-vid">Video</span><span class="d">5m</span></div>
+        <div class="row"><span class="k">10</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/an0wh/lab-4%3A-adding-trajectory-evaluations" target="_blank" rel="noopener">Lab 4 — Trajectory evaluations</a></span><span class="lab lab-lab">Lab</span><span class="d">9m</span></div>
+        <div class="row"><span class="k">11</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/a2c54/adding-structure-to-your-evaluations" target="_blank" rel="noopener">Adding structure to your evaluations</a></span><span class="lab lab-vid">Video</span><span class="d">7m</span></div>
+        <div class="row"><span class="k">12</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/fob86/lab-5%3A-adding-structure-to-your-evaluations" target="_blank" rel="noopener">Lab 5 — Structure your evaluations</a></span><span class="lab lab-lab">Lab</span><span class="d">15m</span></div>
+        <div class="row"><span class="k">13</span><span class="lb"><a href="https://learn.deeplearning.ai/courses/evaluating-ai-agents/lesson/f63n9/improving-your-llm-as-a-judge" target="_blank" rel="noopener">Improving your LLM-as-a-judge</a></span><span class="lab lab-vid">Video</span><span class="d">4m</span></div>
+        <div class="row"><span class="k">14</span><span class="lb"><a href="https://www.deeplearning.ai/courses/evaluating-ai-agents/" target="_blank" rel="noopener">Monitoring agents</a></span><span class="lab lab-vid">Video</span><span class="d">—</span></div>
+      </div>
+      <div class="callout good"><span class="h">🔨 Build it</span>Trace your Chapter II agent, write 20 eval cases from real/likely failures, build an LLM judge aligned to your own labels, and wire the suite as a gate: a change that drops the score can't ship. You now practice evaluation-driven development.</div>
+    </section>
+
+    <!-- CH V -->
+    <section class="section" id="c5">
+      <div class="section-tag">Chapter V · Ship</div>
+      <h2 class="ch"><span class="cn">V</span>Ship to Production</h2>
+      <p class="goal"><b>Goal:</b> turn a working, evaluated agent into a real system — reliable, observable, safe, affordable.</p>
+      <div class="outcome">✓ You can now <b>take an agent from notebook to a production service</b> with guardrails, monitoring, and cost control.</div>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://applied-llms.org" target="_blank" rel="noopener">What We Learned from a Year of Building with LLMs</a></div><div class="by">Yan, Husain, Shankar, Liu &amp; others</div><div class="why">Field-tested lessons from six practitioners — exactly what breaks in production and how to avoid it.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~2 hrs</span></div></div>
+      <div class="res"><div class="ix">2</div><div class="m"><div class="tt"><a href="https://eugeneyan.com/writing/llm-patterns/" target="_blank" rel="noopener">Patterns for Building LLM-based Systems &amp; Products</a></div><div class="by">Eugene Yan</div><div class="why">The 7 production patterns — evals, RAG, caching, guardrails, defensive UX, feedback. A blueprint you'll reuse.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~45 min</span></div></div>
+      <div class="res"><div class="ix">3</div><div class="m"><div class="tt"><a href="https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf" target="_blank" rel="noopener">A Practical Guide to Building Agents</a></div><div class="by">OpenAI</div><div class="why">A concise product + engineering playbook: when agents are worth it, orchestration, guardrails.</div></div><div class="rt"><span class="typ t-docs">PDF</span><span class="tm">~1 hr</span></div></div>
+      <div class="res"><div class="ix">4</div><div class="m"><div class="tt"><a href="https://www.oreilly.com/library/view/ai-engineering/9781098166298/" target="_blank" rel="noopener">AI Engineering</a></div><div class="by">Chip Huyen · O'Reilly</div><div class="why">The one book to own: evaluation, RAG, fine-tuning, inference, architecture. Your deep reference when building for real.</div></div><div class="rt"><span class="typ t-book">Book</span><span class="tm">deep</span></div></div>
+      <div class="callout good"><span class="h">🔨 Build it</span>Deploy your evaluated agent as a service with tracing, a guardrail or two, and a cost/latency dashboard; run the eval gate on every change. Put it in front of five real users.</div>
+    </section>
+
+    <!-- CH VI -->
+    <section class="section" id="c6">
+      <div class="section-tag">Chapter VI · Architect</div>
+      <h2 class="ch"><span class="cn">VI</span>Architect the Enterprise</h2>
+      <p class="goal"><b>Goal:</b> design agent solutions at organizational scale — platform selection, solution design, capabilities &amp; limitations, governance. Optionally earn official credentials.</p>
+      <div class="outcome">✓ You can now <b>design and defend an enterprise agent architecture</b> and speak the platform/solution-design language.</div>
+      <div class="callout blue"><span class="h">Note</span>These two are official <b>Anthropic partner/certification</b> tracks on the partner learning portal — they require a partner login, so the deep content sits behind sign-in. Listed here because they're the clearest enterprise-architect path if you have (or can get) partner access.</div>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://anthropic-partners.skilljar.com/path/claude-certified-architect-professional/claude-platform-solution-design/486647/scorm/2gvs1pi0tq0sq" target="_blank" rel="noopener">Claude Certified Architect (Professional) — Platform Solution Design</a></div><div class="by">Anthropic (partner certification · login required)</div><div class="why">The enterprise solution-design track: designing Claude-based architectures for real organizational problems.</div></div><div class="rt"><span class="typ t-cert">Cert</span><span class="tm">gated</span></div></div>
+      <div class="res"><div class="ix">2</div><div class="m"><div class="tt"><a href="https://anthropic-partners.skilljar.com/path/claude-fde/ai-capabilities-and-limitations/456128" target="_blank" rel="noopener">Claude FDE — AI Capabilities &amp; Limitations</a></div><div class="by">Anthropic (partner training · login required)</div><div class="why">Forward-Deployed-Engineer foundations: what today's models can and can't do — essential for scoping enterprise work honestly.</div></div><div class="rt"><span class="typ t-cert">Cert</span><span class="tm">gated</span></div></div>
+      <div class="res"><div class="ix">3</div><div class="m"><div class="tt"><a href="https://www.anthropic.com/engineering/multi-agent-research-system" target="_blank" rel="noopener">Multi-Agent Research System (re-read as an architect)</a></div><div class="by">Anthropic</div><div class="why">Revisit Chapter III's architecture through an enterprise lens: orchestration, cost, and when multi-agent earns its complexity.</div></div><div class="rt"><span class="typ t-blog">Blog</span><span class="tm">~25 min</span></div></div>
+      <div class="callout good"><span class="h">🔨 Build it</span>Write a one-page solution design for a real enterprise use case: the decision the agent makes, tools, data, guardrails, eval gates, HITL, and a cost model. That document <i>is</i> the architect's deliverable.</div>
+    </section>
+
+    <!-- CH VII -->
+    <section class="section" id="c7">
+      <div class="section-tag">Chapter VII · Frontier</div>
+      <h2 class="ch"><span class="cn">VII</span>The Frontier — Multi-Agent, Research &amp; Benchmarks</h2>
+      <p class="goal"><b>Goal:</b> go deep. University courses, the research that defined the field, and the benchmarks that measure it. This is how you keep growing after the path ends.</p>
+      <div class="outcome">✓ You can now <b>read agent research, benchmark rigorously, and push the frontier</b> — not just consume it.</div>
+
+      <h3>University courses (free, current)</h3>
+      <div class="res feat"><div class="ix">★</div><div class="m"><div class="tt"><a href="https://rdi.berkeley.edu/agentic-ai/f25" target="_blank" rel="noopener">Agentic AI — CS294/194-196 (Fall 2025)</a></div><div class="by">UC Berkeley · Dawn Song</div><div class="why">Guest lectures from OpenAI, DeepMind, NVIDIA, Sierra. Foundations → eval → multi-agent → deployment → safety.</div></div><div class="rt"><span class="typ t-course">MOOC</span><span class="tm">free</span></div></div>
+      <div class="res"><div class="ix">2</div><div class="m"><div class="tt"><a href="https://cs329z.stanford.edu/" target="_blank" rel="noopener">CS329Z — Engineering AI Agents</a></div><div class="by">Stanford · Diyi Yang, Michael Ryan, John Yang (Fall 2026)</div><div class="why">From simple LLM pipelines to compound systems: RAG, tool use, agent loops, DSPy/LangGraph, memory, multi-agent, optimization, eval, safety, coding agents.</div></div><div class="rt"><span class="typ t-course">Course</span><span class="tm">free</span></div></div>
+      <div class="res"><div class="ix">3</div><div class="m"><div class="tt"><a href="https://princeton-nlp.github.io/ai-agents/" target="_blank" rel="noopener">COS 597C — AI Agents</a></div><div class="by">Princeton · Karthik Narasimhan (Fall 2026)</div><div class="why">Graduate seminar on the full stack: architectures, planning &amp; reasoning, tool use, multi-agent, evaluation/benchmarks, safety. Paper-driven.</div></div><div class="rt"><span class="typ t-course">Course</span><span class="tm">free</span></div></div>
+
+      <h3>Benchmarks &amp; the researchers behind them</h3>
+      <div class="res"><div class="ix">4</div><div class="m"><div class="tt"><a href="https://www.swebench.com/original.html" target="_blank" rel="noopener">SWE-bench (original)</a></div><div class="by">Jimenez, Yang, Wettig, Yao, Pei, Press, Narasimhan</div><div class="why">The benchmark that asks: can an agent resolve real GitHub issues? 2,294 tasks from 12 Python repos. The bar serious coding agents are measured against.</div></div><div class="rt"><span class="typ t-paper">Bench</span><span class="tm">ref</span></div></div>
+      <div class="res"><div class="ix">5</div><div class="m"><div class="tt"><a href="https://karthiknarasimhan.com/" target="_blank" rel="noopener">Karthik Narasimhan — research</a></div><div class="by">Princeton PLI · ex-Sierra, ex-OpenAI</div><div class="why">The work behind modern agents: ReAct, Tree of Thoughts, Reflexion, CoALA, SWE-bench/SWE-agent, WebShop, TAU-bench. Follow the papers from here.</div></div><div class="rt"><span class="typ t-site">Site</span><span class="tm">ref</span></div></div>
+
+      <h3>Talks &amp; your saved watch list</h3>
+      <div class="res"><div class="ix">6</div><div class="m"><div class="tt"><a href="https://www.youtube.com/watch?v=6YnLB0XbTnI&list=PLangBM27OtEA" target="_blank" rel="noopener">Agents lecture playlist</a> · <a href="https://www.youtube.com/watch?v=D6v5rlqUIc8" target="_blank" rel="noopener">featured talk</a></div><div class="by">YouTube (saved)</div><div class="why">Recorded talks to binge alongside the courses above.</div></div><div class="rt"><span class="typ t-video">Video</span><span class="tm">series</span></div></div>
+      <div class="watch">
+        <a class="wv" href="https://www.youtube.com/watch?v=VfOA2a0dj4w" target="_blank" rel="noopener"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span><span class="l"><div class="wt">Saved talk 1</div><div class="wu">youtube.com/watch?v=VfOA2a0dj4w</div></span></a>
+        <a class="wv" href="https://www.youtube.com/watch?v=z7RBPQL0rZ4" target="_blank" rel="noopener"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span><span class="l"><div class="wt">Saved talk 2</div><div class="wu">youtube.com/watch?v=z7RBPQL0rZ4</div></span></a>
+        <a class="wv" href="https://www.youtube.com/watch?v=OOdtmCMSOo4" target="_blank" rel="noopener"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span><span class="l"><div class="wt">Saved talk 3</div><div class="wu">youtube.com/watch?v=OOdtmCMSOo4</div></span></a>
+        <a class="wv" href="https://www.youtube.com/watch?v=SrLcGdVOb9w" target="_blank" rel="noopener"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span><span class="l"><div class="wt">Saved talk 4</div><div class="wu">youtube.com/watch?v=SrLcGdVOb9w</div></span></a>
+        <a class="wv" href="https://www.youtube.com/live/CvZDJxd4LKM" target="_blank" rel="noopener"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span><span class="l"><div class="wt">Saved talk 5 (live)</div><div class="wu">youtube.com/live/CvZDJxd4LKM</div></span></a>
+        <a class="wv" href="https://www.youtube.com/watch?v=ntjOxjZMaac" target="_blank" rel="noopener"><span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span><span class="l"><div class="wt">Saved talk 6</div><div class="wu">youtube.com/watch?v=ntjOxjZMaac</div></span></a>
+      </div>
+      <p class="goal" style="font-size:12.5px;color:var(--dim)">Tell me the topic of any saved talk and I'll label it and slot it into the right chapter.</p>
+    </section>
+
+    <!-- CAPSTONE -->
+    <section class="section" id="capstone">
+      <div class="section-tag">Close</div>
+      <h2 class="ch"><span class="cn">◆</span>The Capstone</h2>
+      <p>One project ties the whole book together. Build it and you've proven every chapter:</p>
+      <div class="card tint">
+        <p style="margin:6px 0"><b>Build an evaluation-driven production agent.</b> Pick a real task (support resolution, research assistant, a coding helper). Then:</p>
+        <p style="margin:6px 0">① give it <b>tools + RAG</b> (Ch II) · ② <b>harness</b> it for multi-step work (Ch III) · ③ <b>trace</b> it and build a <b>golden dataset + LLM judge</b> (Ch IV) · ④ <b>deploy</b> it with guardrails and a cost dashboard (Ch V) · ⑤ write its <b>enterprise solution design</b> (Ch VI) · ⑥ <b>benchmark</b> it and read one frontier paper that could improve it (Ch VII).</p>
+        <p style="margin:6px 0">Gate every change on the eval suite. When a change can't ship because it drops the score — you've arrived.</p>
+      </div>
+      <div class="pull">Courses teach the parts. Building teaches the whole. Walk the seven chapters in order, ship the capstone, and you won't just understand agents — you'll architect them.<span class="a">— The Agent Golden Book</span></div>
+    </section>
+
+    <!-- MAP -->
+    <section class="section" id="map">
+      <div class="section-tag">Reference</div>
+      <h2 class="ch"><span class="cn">⌘</span>The Whole Map, at a Glance</h2>
+      <div class="card">
+        <p style="margin:6px 0"><b>I · Foundations</b> — Karpathy Intro to LLMs · Lilian Weng Autonomous Agents · Building Effective Agents · 3Blue1Brown</p>
+        <p style="margin:6px 0"><b>II · Build</b> — HF Agents Course · Writing Tools for Agents · MCP</p>
+        <p style="margin:6px 0"><b>III · Harness</b> — Context Engineering · Effective Harnesses · Multi-Agent Research System</p>
+        <p style="margin:6px 0"><b>IV · Evaluate</b> — Hamel: Evals &amp; LLM-as-Judge · Demystifying Evals · Arize Phoenix Tracing · <b>DeepLearning.AI Evaluating AI Agents</b></p>
+        <p style="margin:6px 0"><b>V · Ship</b> — Applied-LLMs · Eugene Yan Patterns · OpenAI Practical Guide · Chip Huyen AI Engineering</p>
+        <p style="margin:6px 0"><b>VI · Architect</b> — Claude Certified Architect (Solution Design) · Claude FDE (Capabilities &amp; Limitations)</p>
+        <p style="margin:6px 0"><b>VII · Frontier</b> — Berkeley Agentic AI · Stanford CS329Z · Princeton COS 597C · SWE-bench · Karthik Narasimhan · talks</p>
+      </div>
+      <p style="color:var(--dim);font-size:12.5px">Part of the <b>Ravi_AI_Agents_Learn</b> project. Companion deep-dive: the 19-stage production field manual (ask and I'll point you to it).</p>
+    </section>
+
+    </div>
+    <footer>
+      <p><b>The Agent Golden Book</b> · a one-stop ordered path from novice to enterprise agent architect · compiled Nov 2026. Canon links hand-checked; two enterprise tracks are login-gated Anthropic partner courses; saved talks link out directly. The field moves fast — creators &amp; titles help you re-find anything that drifts.</p>
+    </footer>
+  </main>
+</div>
+<button class="backtop" id="bt" title="Back to top">↑</button>
+<script>
+  const links=[...document.querySelectorAll('#nav a')];
+  const map=links.map(a=>({a,el:document.querySelector(a.getAttribute('href'))})).filter(x=>x.el);
+  const bt=document.getElementById('bt'),prog=document.getElementById('prog');
+  function onScroll(){
+    let cur=null;
+    for(const m of map){if(m.el.getBoundingClientRect().top<=140)cur=m;}
+    links.forEach(a=>a.classList.remove('active'));
+    if(cur){cur.a.classList.add('active');cur.a.scrollIntoView({block:'nearest'});}
+    bt.style.display=window.scrollY>700?'block':'none';
+    const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  bt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+</script>
+</body>
+</html>
